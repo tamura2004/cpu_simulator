@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>　CPU演習</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="main.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+  </head>
+  <body>
+
+<!--     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+        <a class="navbar-brand" href="http://192.168.33.10:3000/">第三開発部 CPU演習</a>
+      </div>
+    </nav> -->
+
+    <div class="container" id="app">
+      <div class="page-header">
+        <h1>ＣＰＵシミュレータ</h1>
+      </div>
+
+      <form class="form-horizontal">
+
+        <div class="row">
+          <div class="col-xs-8">
+            <div class="row">
+              <div class="col-xs-4">
+
+                <div class="form-group">
+                  <label class="control-label">プログラムカウンタ（ＰＣ）</label>
+                  <input class="numeric form-control" type="number" step="1" id="cpu_pc" v-model="pc" v-on:change="pcUpdate" />
+                </div>
+
+                <div class="form-group">
+                  <label class="control-label">レジスタ（Ａ）</label>
+                  <input class="numeric form-control" type="number" step="1" id="cpu_a" v-model="a" number="" />
+                </div>
+
+                <div class="form-group">
+                  <label class="control-label">スタックポインタ（ＳＰ）</label>
+                  <input class="numeric form-control" type="number" step="1" id="cpu_sp" v-model="sp"/>
+                </div>
+
+                <div class="form-group">
+                  <label>LED</label>
+                  <div v-bind:class="{'led_on':led, 'led_off':!led}" v-on:click="turnLed">{{led_name}}</div>
+                </div>
+              </div>
+
+              <div class="col-xs-2" v-for="col in 4">
+                <div class="form-group" v-for="m in ms | limitBy 5 (col*5)">
+                  <label class="control-label">{{m.id}}</label>
+                  <input class="numeric form-control" type="number" step="1" v-bind:class="{'pc':m.id == pc, 'sp':m.id == sp}" v-model="m.val" number="" />
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="col-xs-4">
+            <div class="form-group text optional cpu_message">
+              <label class="text optional control-label" for="cpu_message">メッセージ</label>
+              <textarea class="text optional form-control" name="cpu[message]" id="cpu_message">{{message}}</textarea>
+            </div>
+          </div>
+        </div>
+        <hr />
+
+        <input type="submit" name="commit" value="１サイクル実行" class="btn btn-default btn-primary" v-on:click.stop.prevent="execute" />
+        <input type="submit" name="commit" value="HALTまで実行" class="btn btn-default btn-default"  v-on:click.stop.prevent="execute_all" />
+      </form>
+
+    </div>
+  </body>
+  <script type="text/javascript" src="main.js"></script>
+</html>
