@@ -1,0 +1,27 @@
+.page-header
+  h3 一覧画面
+table.table.table-striped
+  thead
+    tr
+      th ID
+      th セーブ名
+      th プログラムカウンタ
+      th レジスタ
+      th スタックポインタ
+      th 更新日
+      th 操作
+  tbody
+    - @cpus.each do |cpu|
+      tr
+        td= link_to cpu.id, cpu_path(cpu)
+        td= cpu.name
+        td= cpu.pc
+        td= cpu.a
+        td= cpu.sp
+        td= cpu.created_at.strftime("%Y/%m/%d %H:%M:%S")
+        td
+          = link_to "実行画面", edit_cpu_path(cpu), :class => 'btn btn-default btn-xs'
+          '
+          = link_to "削除", cpu_path(cpu), :method => :delete, :data => { :confirm => '本当に削除しますか?' }, :class => 'btn btn-xs btn-danger'
+
+= link_to "新規", new_cpu_path, :class => 'btn btn-primary'
