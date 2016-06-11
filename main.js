@@ -74,6 +74,17 @@ new Vue({
       return this.ms[this.sp].val;
     },
 
+    reset: function(){
+      this.pc = 0;
+      this.a = 0;
+      this.sp = 15;
+      this.led = false;
+      this.message = "";
+      for(var i=0; i<20; i++){
+        this.ms[i].val = 0;
+      }
+    },
+
     execute_all: function(){
       var step = 0;
       while(this.at_pc() != 10){
