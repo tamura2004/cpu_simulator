@@ -14,15 +14,18 @@
  *= require_self
  */
 
-// body {
-//   margin-top: 60px;
-// }
-
 input.numeric {
   height: 48px;
-  width: 96px;
-  font-size: 40px;
+  width: 72px;
+  font-size: 28px;
   font-weight: bold;
+}
+
+input#cpu_sp,
+input#cpu_pc,
+input#cpu_a
+{
+  width: 96px;
 }
 
 input#cpu_pc,
@@ -44,7 +47,7 @@ input.pc.sp {
 textarea#cpu_message {
   resize: none;
   overflow: auto;
-  height: 400px;
+  height: 600px;
 }
 
 .led_on, .led_off {
@@ -68,4 +71,8 @@ textarea#cpu_message {
 
 #pc_name {
   width: 80%;
+}
+
+.form-group {
+  margin-bottom: 4px;
 }

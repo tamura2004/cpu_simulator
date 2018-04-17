@@ -9,52 +9,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
   </head>
   <body>
-
-    <div class="container" id="app">
-      <div class="page-header">
-        <h1>ＣＰＵシミュレータ</h1>
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-brand">6bit CPU </div>
       </div>
-
+    </nav>
+    <div class="container" id="app">
       <form class="form-horizontal">
 
         <div class="row">
-          <div class="col-xs-8">
-            <div class="row">
-              <div class="col-xs-4">
+          <div class="col-xs-2">
 
-                <div class="form-group">
-                  <label class="control-label">プログラムカウンタ（ＰＣ）</label>
-                  <input class="numeric form-control" type="number" step="1" id="cpu_pc" v-model="pc" number="" />
-                </div>
-
-                <div class="form-group">
-                  <label class="control-label">レジスタ（Ａ）</label>
-                  <input class="numeric form-control" type="number" step="1" id="cpu_a" v-model="a" number="" />
-                </div>
-
-                <div class="form-group">
-                  <label class="control-label">スタックポインタ（ＳＰ）</label>
-                  <input class="numeric form-control" type="number" step="1" id="cpu_sp" v-model="sp" number="" />
-                </div>
-
-                <div class="form-group">
-                  <label>LED</label>
-                  <div v-bind:class="{'led_on':led, 'led_off':!led}" v-on:click="turn_led">{{led_name}}</div>
-                </div>
-              </div>
-
-              <div class="col-xs-2" v-for="col in 4">
-                <div class="form-group" v-for="m in ms | limitBy 5 (col*5)">
-                  <label class="control-label">{{m.id}}</label>
-                  <input class="numeric form-control" type="number" step="1" v-bind:class="{'pc':m.id == pc, 'sp':m.id == sp}" v-model="m.val" number="" />
-                </div>
-              </div>
-
+            <div class="form-group">
+              <label class="control-label">PC</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_pc" v-model="pc" number="" />
             </div>
 
+            <div class="form-group">
+              <label class="control-label">A</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_a" v-model="a" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">SP</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_sp" v-model="sp" number="" />
+            </div>
+
+            <div class="form-group">
+              <label>LED</label>
+              <div v-bind:class="{'led_on':led, 'led_off':!led}" v-on:click="turn_led">{{led_name}}</div>
+            </div>
           </div>
 
-          <div class="col-xs-4">
+          <div class="col-xs-1" v-for="col in 8">
+            <div class="form-group" v-for="m in ms | limitBy 8 (col*8)">
+              <label class="control-label">{{m.id}}</label>
+              <input class="numeric form-control" type="number" step="1" v-bind:class="{'pc':m.id == pc, 'sp':m.id == sp}" v-model="m.val" number="" />
+            </div>
+          </div>
+
+          <div class="col-xs-2">
             <div class="form-group text optional cpu_message">
               <label class="text optional control-label" for="cpu_message">メッセージ</label>
               <textarea class="text optional form-control" name="cpu[message]" id="cpu_message">{{message.join("\n")}}</textarea>
