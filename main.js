@@ -2,9 +2,11 @@ new Vue({
   el: "#app",
   data: {
     name: "red moon",
-    pc: 0,
+    pc: 8,
     sp: 63,
     a: 0,
+    b: 0,
+    f: 0,
     led: false,
     ms: [
       {id: 0, val: 0},
@@ -107,8 +109,47 @@ new Vue({
     },
 
     add_a: function(val){
-      this.a += (val % 64);
-      this.a %= 64;
+      this.a += val;
+      if(this.a < 64){
+        this.f = 0;
+      }else{
+        this.a %= 64;
+        this.f = 2;
+      }
+    },
+
+    sub_a: function(val){
+      this.a -= val;
+      if(this.a == 0){
+        this.f = 1;
+      }else if (this.a < 0){
+        this.a += 64;
+        this.f = 2;
+      }else{
+        this.f = 0;
+      }
+    },
+
+    add_b: function(val){
+      this.b += val;
+      if(this.b < 64){
+        this.f = 0;
+      }else{
+        this.b %= 64;
+        this.f = 2;
+      }
+    },
+
+    sub_b: function(val){
+      this.b -= val;
+      if(this.b == 0){
+        this.f = 1;
+      }else if (this.b < 0){
+        this.b += 64;
+        this.f = 2;
+      }else{
+        this.f = 0;
+      }
     },
 
     at_pc: function(){
@@ -123,9 +164,35 @@ new Vue({
       return this.ms[addr % 64].val;
     },
 
+    set: function(addr,val){
+      this.ms[addr % 64].val = (val % 64);
+    },
+
+    add: function(a,b){
+      var val = a + b;
+      if(val > 64){
+        val %= 64;
+        this.f |= 2;
+      }
+      return val;
+    },
+
+    sub: function(a,b){
+      var val = a - b;
+      if(val == 0){
+        this.f |= 1;
+      }else if(val < 0){
+        this.f |= 2;
+        val %= 64; 
+      }
+      return val;
+    },
+
     reset_register: function(){
-      this.pc = 0;
+      this.pc = 8;
       this.a = 0;
+      this.b = 0;
+      this.f = 0;
       this.sp = 63;
       this.led = false;
       this.message = [];
@@ -163,10 +230,10 @@ new Vue({
         if(step > 1000){
           this.add_message("1000ステップ実行で中断しました。");
 
-        }else if(this.at_pc() > 10){
+        }else if(this.at_pc() > 63){
           this.add_message("無効な命令です");
 
-        }else if(this.at_pc() == 10){
+        }else if(this.at_pc() == 1){
           this.add_message("CPUを停止しました");
 
         }else{
@@ -181,73 +248,400 @@ new Vue({
       var m = this.at_pc();
 
       switch(m) {
-        case 0:
+        case 0: // NOP
+          this.inc_pc();
           this.add_message("NOP");
-          this.inc_pc();
           break;
 
-        case 1:
-          this.add_message("LEDを点灯させました");
-          this.led = true;
-          this.inc_pc();
+        case 1: // HALT
+          this.add_message("HALT");
           break;
 
-        case 2:
-          this.add_message("LEDを消灯させました");
-          this.led = false;
-          this.inc_pc();
+        case 2: // RST
+          this.pc = 8;
+          this.add_message("RST");
           break;
 
-        case 3:
-          this.add_message("PUSH A");
+        case 3: // INT
+          this.push(this.a);
+          this.push(this.b);
+          this.push(this.f);
+          this.inc_pc();
+          this.push(this.pc);
+          this.pc = 0;
+          this.add_message("INT");
+          break;
+
+        case 4: // CALL n
+          this.push(this.a);
+          this.push(this.b);
+          this.push(this.f);
+          this.inc_pc();
+          this.pc = this.at_pc();
+          this.inc_pc();
+          this.push(this.pc);
+          this.add_message("CALL " + this.pc);
+          break;
+
+        case 5: // RET
+          this.pc = this.pop()
+          this.f = this.pop()
+          this.b = this.pop()
+          this.a = this.pop()
+          this.add_message("RET");
+          break;
+
+        case 6: // RND A
+          this.a = Math.floor(Math.random()*64);
+          this.inc_pc();
+          this.add_message("RND A")
+          break;
+
+        case 7: // PRT A
+          this.inc_pc();
+          this.add_message(String.fromCharCode(this.a + 32));
+          break;
+
+        case 8: // INC A
+          this.add_a(1);
+          this.inc_pc();
+          this.add_message("INC A");
+          break;
+
+        case 9: // INC B
+          this.add_b(1);
+          this.inc_pc();
+          this.add_message("INC B");
+          break;
+
+        case 10: // DEC A
+          this.sub_a(1);
+          this.inc_pc();
+          this.add_message("DEC A");
+          break;
+
+        case 11: // DEC B
+          this.sub_b(1);
+          this.inc_pc();
+          this.add_message("DEC B");
+          break;
+
+        case 12: // PUSH A
           this.push(this.a);
           this.inc_pc();
+          this.add_message("PUSH A");
           break;
 
-        case 4:
-          this.add_message("POP A");
+        case 13: // PUSH B
+          this.push(this.b);
+          this.inc_pc();
+          this.add_message("PUSH B");
+          break;
+
+        case 14: // POP A
           this.a = this.pop();
           this.inc_pc();
-
-        case 5:
-          this.add_message("ADD A,n");
-          this.inc_pc();
-          this.add_a(this.at_pc());
-          this.inc_pc();
+          this.add_message("POP A");
           break;
 
-        case 6:
-          this.add_message("LD A,n");
+        case 15: // POP B
+          this.b = this.pop();
+          this.inc_pc();
+          this.add_message("POP B");
+          break;
+
+        case 16: // LD A n
           this.inc_pc();
           this.a = this.at_pc();
           this.inc_pc();
+          this.add_message("LD A " + this.a);
           break;
 
-        case 7:
-          this.add_message("JNZ n");
+        case 17: // LD A B
+          this.a = this.b;
           this.inc_pc();
-          if(this.a == 0){
-            this.inc_pc();
+          this.add_message("LD A B");
+          break;
+
+        case 18: // LD A SP
+          this.a = this.sp;
+          this.inc_pc();
+          this.add_message("LD A SP");
+          break;
+
+        case 19: // LD A [n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.a = this.at(n);
+          this.inc_pc();
+          this.add_message("LD A [" + n + "]");
+          break;
+
+        case 20: // LD A [B]
+          this.a = this.at(this.b);
+          this.inc_pc();
+          this.add_message("LD A [B]");
+          break;
+
+        case 21: // LD A [SP]
+          this.a = this.at(this.sp);
+          this.inc_pc();
+          this.add_message("LD A [SP]");
+          break;
+
+        case 22: // LD A [B+n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.a = this.at(this.b + n);
+          this.inc_pc();
+          this.add_message("LD A [B+" + n + "]");
+          break;
+
+        case 23: // LD A [PC+n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.a = this.at(this.sp + n);
+          this.inc_pc();
+          this.add_message("LD A [SP+" + n + "]");
+          break;
+
+        case 24: // LD B n
+          this.inc_pc();
+          var n = this.at_pc();
+          this.b = n;
+          this.inc_pc();
+          this.add_message("LD B " + n);
+          break;
+
+        case 25: // LD B A
+          this.b = this.a;
+          this.inc_pc();
+          this.add_message("LD B A");
+          break;
+
+        case 26: // LD A SP
+          this.sp = this.a;
+          this.inc_pc();
+          this.add_message("LD SP A");
+          break;
+
+        case 27: // LD [n] A
+          this.inc_pc();
+          var n = this.at_pc();
+          this.set(n, this.a);
+          this.inc_pc();
+          this.add_message("LD [" + n + "] A");
+          break;
+
+        case 28: // LD [B] A
+          this.set(this.b, this.a);
+          this.inc_pc();
+          this.add_message("LD [B] A");
+          break;
+
+        case 29: // LD [SP] A
+          this.set(this.sp, this.a);
+          this.inc_pc();
+          this.add_message("LD [SP] A");
+          break;
+
+        case 30: // LD [B+n] A
+          this.inc_pc();
+          var n = this.at_pc();
+          this.set(this.b + n, this.a);
+          this.inc_pc();
+          this.add_message("LD [B+" + n + "] A");
+          break;
+
+        case 31: // LD [SP+n] A
+          this.inc_pc();
+          var n = this.at_pc();
+          this.set(this.sp + n, this.a);
+          this.inc_pc();
+          this.add_message("LD [SP+" + n + "] A");
+          break;
+
+        case 32: // AND A B
+          this.a &= this.b;
+          this.inc_pc();
+          this.add_message("AND A B");
+          break;
+
+        case 33: // OR A B
+          this.a |= this.b;
+          this.inc_pc();
+          this.add_message("OR A B");
+          break;
+
+        case 34: // XOR A B
+          this.a ^= this.b;
+          this.inc_pc();
+          this.add_message("OR A B");
+          break;
+
+        case 35: // NOT A
+          this.a = 63 - this.a;
+          this.inc_pc();
+          this.add_message("NOT A");
+          break;
+
+        case 36: // NOT F
+          this.f = 63 - this.f;
+          this.inc_pc();
+          this.add_message("NOT F");
+          break;
+
+        case 37: // NEG A
+          this.a = (64 - this.a) % 64;
+          this.inc_pc();
+          this.add_message("NEG A");
+          break;
+
+        case 38: // DIV A B
+          this.a = Math.floor(this.a / this.b);
+          this.inc_pc();
+          this.add_message("DIV A B");
+          break;
+
+        case 39: // MOD A B
+          this.a = this.a % this.b;
+          this.inc_pc();
+          this.add_message("MOD A B");
+          break;
+
+        case 40: // ADD A n
+          this.inc_pc();
+          var n = this.at_pc();
+          this.add_a(n);
+          this.inc_pc();
+          this.add_message("ADD A " + n);
+          break;
+
+        case 41: // ADD A B
+          this.add_a(this.b);
+          this.inc_pc();
+          this.add_message("ADD A B");
+          break;
+
+        case 42: // ADD A SP
+          this.add_a(this.sp);
+          this.inc_pc();
+          this.add_message("ADD A SP");
+          break;
+
+        case 43: // ADD A [n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.add_a(this.at(n));
+          this.inc_pc();
+          this.add_message("ADD A [" + n + "]");
+          break;
+
+        case 44: // ADD A [B]
+          this.add_a(this.at(this.b));
+          this.inc_pc();
+          this.add_message("ADD A [B]");
+          break;
+
+        case 45: // ADD A [SP]
+          this.add_a(this.at(this.sp));
+          this.inc_pc();
+          this.add_message("ADD A [SP]");
+          break;
+
+        case 46: // ADD A [B+n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.add_a(this.at(this.b + n));
+          this.inc_pc();
+          this.add_message("ADD A [B+" + n + "]");
+          break;
+
+        case 47: // ADD A [PC+n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.add_a(this.at(this.sp + n));
+          this.inc_pc();
+          this.add_message("ADD A [SP+" + n + "]");
+          break;
+
+        case 48: // SUB A n
+          this.inc_pc();
+          var n = this.at_pc();
+          this.sub_a(n);
+          this.inc_pc();
+          this.add_message("SUB A " + n);
+          break;
+
+        case 49: // SUB A B
+          this.sub_a(this.b);
+          this.inc_pc();
+          this.add_message("SUB A B");
+          break;
+
+        case 50: // SUB A SP
+          this.sub_a(this.sp);
+          this.inc_pc();
+          this.add_message("SUB A SP");
+          break;
+
+        case 51: // SUB A [n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.sub_a(this.at(n));
+          this.inc_pc();
+          this.add_message("SUB A [" + n + "]");
+          break;
+
+        case 52: // SUB A [B]
+          this.sub_a(this.at(this.b));
+          this.inc_pc();
+          this.add_message("SUB A [B]");
+          break;
+
+        case 53: // SUB A [SP]
+          this.sub_a(this.at(this.sp));
+          this.inc_pc();
+          this.add_message("SUB A [SP]");
+          break;
+
+        case 54: // SUB A [B+n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.sub_a(this.at(this.b + n));
+          this.inc_pc();
+          this.add_message("SUB A [B+" + n + "]");
+          break;
+
+        case 55: // SUB A [PC+n]
+          this.inc_pc();
+          var n = this.at_pc();
+          this.sub_a(this.at(this.sp + n));
+          this.inc_pc();
+          this.add_message("SUB A [SP+" + n + "]");
+          break;
+
+        case 56:
+          this.inc_pc();
+          var n = this.at_pc();
+          this.pc = n;
+          this.add_message("JMP " + n);
+          break;
+
+        case 57:
+          this.pc = this.b;
+          this.add_message("JMP B");
+          break;
+
+        case 58:
+          this.inc_pc();
+          var n = this.at_pc();
+          if(this.f & 1){
+            this.pc = n;
           }else{
-            this.pc = this.at_pc();
+            this.inc_pc();
           }
-          break;
-
-        case 8:
-          this.add_message("CALL n");
-          this.push(this.pc + 2);
-          this.push(this.a);
-          this.pc = this.at(this.pc + 1);
-          break;
-
-        case 9:
-          this.add_message("RET");
-          this.a = this.pop();
-          this.pc = this.pop();
-          break;
-
-        case 10:
-          this.add_message("HALT");
+          this.add_message("JPZ " + n);
           break;
 
         default:

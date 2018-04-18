@@ -31,14 +31,20 @@
             </div>
 
             <div class="form-group">
+              <label class="control-label">B</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_b" v-model="b" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">FLAG</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_f" v-model="f" number="" />
+            </div>
+
+            <div class="form-group">
               <label class="control-label">SP</label>
               <input class="numeric form-control" type="number" step="1" id="cpu_sp" v-model="sp" number="" />
             </div>
 
-            <div class="form-group">
-              <label>LED</label>
-              <div v-bind:class="{'led_on':led, 'led_off':!led}" v-on:click="turn_led">{{led_name}}</div>
-            </div>
           </div>
 
           <div class="col-xs-1" v-for="col in 8">

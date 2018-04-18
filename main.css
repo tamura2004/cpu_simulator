@@ -23,7 +23,9 @@ input.numeric {
 
 input#cpu_sp,
 input#cpu_pc,
-input#cpu_a
+input#cpu_a,
+input#cpu_b,
+input#cpu_f
 {
   width: 96px;
 }
@@ -31,12 +33,14 @@ input#cpu_a
 input#cpu_pc,
 input.pc
 {
+  /*background: #ff7675;*/
   background: #db8f86;
 }
 
 input#cpu_sp,
 input.sp
 {
+  /*background: #74b9ff;*/
   background: #70c0ca;
 }
 
@@ -48,25 +52,6 @@ textarea#cpu_message {
   resize: none;
   overflow: auto;
   height: 600px;
-}
-
-.led_on, .led_off {
-  height: 48px;
-  width: 96px;
-  text-align: center;
-
-  font-size: 32px;
-  font-weight: bold;
-  border: 1px solid #cccccc;
-  border-radius: 4px;
-}
-
-.led_off {
-  background: #cccccc;
-}
-
-.led_on {
-  background: #e4dda5;
 }
 
 #pc_name {
