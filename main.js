@@ -2,7 +2,7 @@ new Vue({
   el: "#app",
   data: {
     name: "red moon",
-    pc: 8,
+    pc: 0,
     sp: 63,
     a: 0,
     b: 0,
@@ -189,7 +189,7 @@ new Vue({
     },
 
     reset_register: function(){
-      this.pc = 8;
+      this.pc = 0;
       this.a = 0;
       this.b = 0;
       this.f = 0;
