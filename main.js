@@ -96,16 +96,8 @@ new Vue({
     },
 
     sub: function(a,b){
-      console.dir([a,b])
-      var c = this.to10(a);
-      var d = this.to10(b);
-      console.log(c);
-      console.log(d);
-
       var x = this.to10(a) - this.to10(b);
-      console.log(x);
       var y = this.mod36(x);
-      console.log(y);
       return this.to6(y);
     },
 
@@ -362,6 +354,7 @@ new Vue({
               this.pop('pc');
               break;
           }
+          break;
 
         default:
           this.add_message("無効な命令です");
