@@ -51,7 +51,7 @@ input.pc.sp {
 textarea#cpu_message {
   resize: none;
   overflow: auto;
-  height: 600px;
+  height: 446px;
 }
 
 #pc_name {

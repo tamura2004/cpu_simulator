@@ -31,13 +31,18 @@
             </div>
 
             <div class="form-group">
-              <label class="control-label">B</label>
-              <input class="numeric form-control" type="number" step="1" id="cpu_b" v-model="b" number="" />
+              <label class="control-label">IX</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_ix" v-model="ix" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">IY</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_iy" v-model="iy" number="" />
             </div>
 
             <div class="form-group">
               <label class="control-label">FLAG</label>
-              <input class="numeric form-control" type="number" step="1" id="cpu_f" v-model="f" number="" />
+              <input class="numeric form-control" type="number" step="1" id="cpu_flag" v-model="flag" number="" />
             </div>
 
             <div class="form-group">
@@ -47,8 +52,8 @@
 
           </div>
 
-          <div class="col-xs-1" v-for="col in 8">
-            <div class="form-group" v-for="m in ms | limitBy 8 (col*8)">
+          <div class="col-xs-1" v-for="col in 6">
+            <div class="form-group" v-for="m in ms | limitBy 6 (col*6)">
               <label class="control-label">{{m.id}}</label>
               <input class="numeric form-control" type="number" step="1" v-bind:class="{'pc':m.id == pc, 'sp':m.id == sp}" v-model="m.val" number="" />
             </div>
@@ -63,8 +68,9 @@
         </div>
         <hr />
 
-        <input type="submit" name="commit" value="１サイクル実行" class="btn btn-default btn-primary" v-on:click.stop.prevent="execute" />
-        <input type="submit" name="commit" value="HALTまで実行" class="btn btn-default btn-default"  v-on:click.stop.prevent="execute_all" />
+        <input type="submit" name="commit" value="ステップ実行" class="btn btn-default btn-primary" v-on:click.stop.prevent="execute" />
+        <input type="submit" name="commit" value="実行" class="btn btn-default btn-default"  v-on:click.stop.prevent="execute_all" />
+        <input type="submit" name="commit" value="停止" class="btn btn-default btn-default"  v-on:click.stop.prevent="halt = true" />
         <input type="submit" name="commit" value="レジスタリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_register" />
         <input type="submit" name="commit" value="メモリリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_memory" />
         <!-- <input type="submit" name="commit" value="load" class="btn btn-default btn-default"  v-on:click.stop.prevent="load" /> -->
