@@ -322,7 +322,6 @@ new Vue({
               break;
 
           }
-          this.a = this.add(this.a, -this.operand);
           break;
 
         case 'CALL':
