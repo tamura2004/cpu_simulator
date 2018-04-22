@@ -168,6 +168,7 @@ new Vue({
           this.inc_pc();
           break;
 
+        case 'JMP':
         case 'LD':
         case 'ADD':
         case 'SUB':
