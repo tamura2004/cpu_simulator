@@ -1,5 +1,5 @@
 var MEMORY = []
-var PGM = "33,45,30,5,50,14, 23,4,4,1,50,24, 23,4,14,51,35,22, 32,42,54,31,44,45, 51,5,14,11,3,34, 0,0,0,0,0,0"
+var PGM = "33,41,30,5,50,14, 23,4,4,1,50,24, 23,4,14,51,35,22, 32,42,54,31,44,45, 51,5,14,11,3,34, 0,0,0,0,0,0"
 var codes = PGM.split(',');
 for(var i = 0; i < 36; i++){
   MEMORY.push({
@@ -86,18 +86,14 @@ new Vue({
     },
 
     add: function(a,b){
-      if(36 < a + b){
-        this.flag = 2;
-      }else{
-        this.flag = 0;
-      }
-
       return this.to6(this.mod36(this.to10(a) + this.to10(b)));
     },
 
     sub: function(a,b){
       if(a == b){
         this.flag = 1;
+      }else if(a < b){
+        this.flag = 2;
       }else{
         this.flag = 0;
       }
@@ -105,11 +101,11 @@ new Vue({
     },
 
     inc: function(name){
-      this[name] = this.add(this[name],1);
+      this.set(name, this.add(this.get(name), 1));
     },
 
     dec: function(name){
-      this[name] = this.sub(this[name],1);
+      this.set(name, this.sub(this.get(name), 1));
     },
 
     get: function(name){
@@ -202,17 +198,17 @@ new Vue({
 
     push: function(name){
       this.set('[SP]',this.get(name));
-      this.dec('sp');
+      this.dec('SP');
     },
 
     pop: function(name){
-      this.inc('sp');
+      this.inc('SP');
       this.set(name,this.get('[SP]'));
     },
 
     fetch: function(){
       this.opecode = this.get_memory(this.pc);
-      this.inc('pc');
+      this.inc('PC');
 
       this.nimonic = this.table[this.opecode];
       this.msg = this.nimonic;
@@ -221,7 +217,7 @@ new Vue({
       // オペランドの読み込み
       if(this.params[2] == 'n'){
         this.operand = this.get_memory(this.pc);
-        this.inc('pc');
+        this.inc('PC');
         this.msg = this.msg.replace(/n$/,this.operand);
       }else{
         this.operand = null;
@@ -283,7 +279,8 @@ new Vue({
         case 'JMP':
           switch(this.params[1]){
             case 'NZ':
-              if(this.zero()){
+              console.log(this.flag);
+              if(this.flag == 1){
                 break;
               }
 
@@ -307,11 +304,11 @@ new Vue({
           break;
 
         case 'INC':
-          this.inc(this.reg);
+          this.inc(this.params[1]);
           break;
 
         case 'DEC':
-          this.dec(this.reg);
+          this.dec(this.params[1]);
           break;
 
         case 'LD':
@@ -339,7 +336,8 @@ new Vue({
                 break;
               }
             case 'NZ':
-              if(this.zero()){
+
+              if(this.flag == 1){
                 break;
               }
             case 'C':
