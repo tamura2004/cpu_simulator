@@ -1,5 +1,5 @@
 var MEMORY = []
-var PGM = "33,40,30,5,50,14,23,4,4,1,50,24,23,4,14,51,35,22,32,42,54,44,45,51,5,14,11,4,32,54,0,0,0,0,0,0"
+var PGM = "33,45,30,5,50,14, 23,4,4,1,50,24, 23,4,14,51,35,22, 32,42,54,31,44,45, 51,5,14,11,3,34, 0,0,0,0,0,0"
 var codes = PGM.split(',');
 for(var i = 0; i < 36; i++){
   MEMORY.push({
@@ -31,15 +31,15 @@ var NIMONIC = {
   31: 'LD A [IX]',
   32: 'LD A [IY]',
   33: 'LD IX n',
-  34: 'LD IX Y',
+  34: 'LD IX IY',
   35: 'LD IY IX',
   40: 'ADD A [IX]',
   41: 'ADD A [IY]',
   42: 'SUB A [IX]',
   43: 'SUB A [IY]',
-  44: 'EX A [IX]',
-  45: 'EX A [IY]',
-  50: 'CALL n',
+  44: 'LD [IX] [IY]',
+  45: 'LD [IY] A',
+  50: 'CALL AL n',
   51: 'RET AL',
   52: 'RET Z',
   53: 'RET NZ',
@@ -58,11 +58,16 @@ new Vue({
     iy: 0,
     flag: 0,
     halt: false,
-    ms: MEMORY,
     message: [],
+    msg: '',
     opecode: 0,
-    operands: 0,
+    operand: 0,
+    reg: '',
+    addr: 0,
+    val: 0,
     nimonic: '',
+    params: [],
+    ms: MEMORY,
     table: NIMONIC
   },
 
@@ -76,29 +81,27 @@ new Vue({
     },
 
     mod36: function(a) {
-      if(a < 0 || 36 <= a){
-        this.flag |= 2;
-      }else{
-        this.flag &= 1;
-      }
-
       a = (a + 36) % 36;
-      if(a == 0){
-        this.flag |= 1;
-      }else{
-        this.flag &= 2;
-      }
       return a;
     },
 
     add: function(a,b){
+      if(36 < a + b){
+        this.flag = 2;
+      }else{
+        this.flag = 0;
+      }
+
       return this.to6(this.mod36(this.to10(a) + this.to10(b)));
     },
 
     sub: function(a,b){
-      var x = this.to10(a) - this.to10(b);
-      var y = this.mod36(x);
-      return this.to6(y);
+      if(a == b){
+        this.flag = 1;
+      }else{
+        this.flag = 0;
+      }
+      return this.to6(this.mod36(this.to10(a) - this.to10(b)));
     },
 
     inc: function(name){
@@ -106,99 +109,126 @@ new Vue({
     },
 
     dec: function(name){
-      this[name] = this.add(this[name],-1);
+      this[name] = this.sub(this[name],1);
     },
 
-    inc_pc: function(){
-      this.inc('pc');
+    get: function(name){
+      switch(name){
+        case 'n':
+          return this.operand;
+
+        case 'A':
+        case 'IX':
+        case 'IY':
+        case 'SP':
+        case 'PC':
+          return this.get_register(name);
+
+        case '[IX]':
+        case '[IY]':
+        case '[SP]':
+          return this.get(this.get(name.substr(1,2)));
+
+        default:
+          return this.get_memory(name);
+      }
+    },
+
+    set: function(name,val){
+      switch(val){
+        case 'n':
+        case 'A':
+        case 'IX':
+        case 'IY':
+        case 'SP':
+        case 'PC':
+        case '[IX]':
+        case '[IY]':
+        case '[SP]':
+          val = this.get(val);
+      }
+      
+      switch(name){
+        case 'A':
+        case 'IX':
+        case 'IY':
+        case 'SP':
+        case 'PC':
+          this.set_register(name,val);
+          break;
+
+        case '[IX]':
+        case '[IY]':
+        case '[SP]':
+          return this.set(this.get(name.substr(1,2)),val);
+          break;
+
+        default:
+          return this.set_memory(name,val);
+      }
+    },
+
+    get_register: function(name){
+      return this[name.toLowerCase()];
     },
 
     get_memory: function(addr){
       return this.ms[this.to10(addr)].val;
     },
 
+    set_register: function(name,val){
+      this[name.toLowerCase()] = val;
+    },
+    
     set_memory: function(addr,val){
       this.ms[this.to10(addr)].val = val;
     },
 
-    at_pc: function() {
-      return this.get_memory(this.pc);
-    },
-
-    set: function(name,val){
-      this[name].val = val;
-    },
-
     zero: function(){
-      return !!(this.flag & 1);
+      return this.flag == 1;
     },
 
     nonzero: function(){
-      return !this.zero();
+      return this.flag != 1;
     },
     
     carry: function(){
-      return !!(this.flag & 2);
+      return this.flag == 2;
     },
 
     noncarry: function(){
-      return !this.carry();
+      return this.flag != 2;
     },
 
-    push: function(val){
-      this.set_memory(this.sp,val);
+    push: function(name){
+      this.set('[SP]',this.get(name));
       this.dec('sp');
     },
 
     pop: function(name){
       this.inc('sp');
-      this[name] = this.get_memory(this.sp);
+      this.set(name,this.get('[SP]'));
     },
 
     fetch: function(){
-      this.opecode = this.at_pc();
-      this.inc_pc();
+      this.opecode = this.get_memory(this.pc);
+      this.inc('pc');
+
       this.nimonic = this.table[this.opecode];
+      this.msg = this.nimonic;
+      this.params = this.nimonic.split(' ');
 
       // オペランドの読み込み
-      params = this.nimonic.split(' ');
-      switch(params[0]){
-        case 'CALL':
-          this.operand = this.at_pc();
-          this.inc_pc();
-          break;
-
-        case 'JMP':
-        case 'LD':
-        case 'ADD':
-        case 'SUB':
-        case 'EX':
-          switch(params[2]){
-            case 'n':
-              this.operand = this.at_pc();
-              this.inc_pc();
-              break;
-
-            case 'IX':
-              this.operand = this.ix;
-              break;
-              
-            case 'IY':
-              this.operand = this.iy;
-              break;
-
-            case '[IX]':
-              this.operand = this.get_memory(this.ix);
-              break;
-              
-            case '[IY]':
-              this.operand = this.get_memory(this.iy);
-              break;
-          }
-          break;
-        default:
-          this.operand = null;
+      if(this.params[2] == 'n'){
+        this.operand = this.get_memory(this.pc);
+        this.inc('pc');
+        this.msg = this.msg.replace(/n$/,this.operand);
+      }else{
+        this.operand = null;
       }
+
+      // ログ出力
+      this.add_message(this.msg)
     },
 
     reset_register: function(){
@@ -241,29 +271,17 @@ new Vue({
 
     execute: function(event){
       this.fetch();
-      var msg = this.nimonic;
-      if(this.operand){
-        msg = msg.replace('n', this.operand);
-      }
-      this.add_message(msg)
 
-      var params = this.nimonic.split(' ');
-      var sub = null
-      if(params.length > 1){
-        sub = params[1].toLowerCase();
-      }
-
-      switch(params[0]) {
+      switch(this.params[0]) {
         case 'NOP':
           break;
 
         case 'HALT':
-          this.dec('pc');
           this.halt = true;
           break;
 
         case 'JMP':
-          switch(params[1]){
+          switch(this.params[1]){
             case 'NZ':
               if(this.zero()){
                 break;
@@ -275,64 +293,47 @@ new Vue({
               }
 
             case 'AL':
-              this.pc = this.operand;
+              this.set('PC', this.params[2])
               break;
           }
           break;
 
         case 'PUSH':
-          this.push(this[sub]);
+          this.push(this.params[1]);
           break;
 
         case 'POP':
-          this.inc(sub);
+          this.pop(this.params[1]);
           break;
 
         case 'INC':
-          this.inc(sub);
+          this.inc(this.reg);
           break;
 
         case 'DEC':
-          this.dec(sub);
+          this.dec(this.reg);
           break;
 
         case 'LD':
-          this[sub] = this.operand;
+          this.set(this.params[1],this.params[2]);
           break;
 
         case 'ADD':
-          this.a = this.add(this.a, this.operand);
+          this.a = this.add(this.a, this.val);
           break;
 
         case 'SUB':
-          this.a = this.sub(this.a, this.operand);
-          break;
-
-        case 'EX':
-          switch(params[2]){
-            case '[IX]':
-              var tmp = this.get_memory(this.ix);
-              this.set_memory(this.ix, this.a);
-              this.a = tmp;
-              break;
-
-            case '[IY]':
-              var tmp = this.get_memory(this.iy);
-              this.set_memory(this.iy, this.a);
-              this.a = tmp;
-              break;
-
-          }
+          this.a = this.sub(this.a, this.val);
           break;
 
         case 'CALL':
-          this.push(this.a);
-          this.push(this.pc);
+          this.push('A');
+          this.push('PC');
           this.pc = this.operand;
           break;
 
         case 'RET':
-          switch(params[1]){
+          switch(this.params[1]){
             case 'Z':
               if(this.nonzero()){
                 break;
@@ -350,8 +351,8 @@ new Vue({
                 break;
               }
             case 'AL':
-              this.pop('a');
-              this.pop('pc');
+              this.pop('PC');
+              this.pop('A');
               break;
           }
           break;

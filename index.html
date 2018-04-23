@@ -75,6 +75,9 @@
         <input type="submit" name="commit" value="メモリリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_memory" />
         <!-- <input type="submit" name="commit" value="load" class="btn btn-default btn-default"  v-on:click.stop.prevent="load" /> -->
       </form>
+      <pre>
+        {{ $data | json 2}}
+      </pre>
 
     </div>
   </body>
