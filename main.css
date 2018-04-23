@@ -48,7 +48,8 @@ input.pc.sp {
   background-image: linear-gradient(90deg,#db8f86,#70c0ca)
 }
 
-textarea#cpu_message {
+textarea#cpu_message,
+textarea#code {
   resize: none;
   overflow: auto;
   height: 446px;
@@ -60,4 +61,8 @@ textarea#cpu_message {
 
 .form-group {
   margin-bottom: 4px;
+}
+
+textarea.text {
+  width: 168px;
 }

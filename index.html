@@ -65,19 +65,33 @@
               <textarea class="text optional form-control" name="cpu[message]" id="cpu_message">{{message.join("\n")}}</textarea>
             </div>
           </div>
+          <div class="col-xs-2">
+            <div class="form-group text optional code">
+              <label class="text optional control-label" for="code">コード</label>
+              <textarea class="text optional form-control" name="code" id="code">{{code.join("\n")}}</textarea>
+            </div>
+          </div>
         </div>
         <hr />
 
-        <input type="submit" name="commit" value="ステップ実行" class="btn btn-default btn-primary" v-on:click.stop.prevent="execute" />
-        <input type="submit" name="commit" value="実行" class="btn btn-default btn-default"  v-on:click.stop.prevent="execute_all" />
-        <input type="submit" name="commit" value="停止" class="btn btn-default btn-default"  v-on:click.stop.prevent="halt = true" />
-        <input type="submit" name="commit" value="レジスタリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_register" />
-        <input type="submit" name="commit" value="メモリリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_memory" />
-        <!-- <input type="submit" name="commit" value="load" class="btn btn-default btn-default"  v-on:click.stop.prevent="load" /> -->
-      </form>
-      <pre>
+        <div class="row">
+          <div class="col-xs-8">
+            <input type="submit" name="commit" value="ステップ実行" class="btn btn-default btn-primary" v-on:click.stop.prevent="execute" />
+            <input type="submit" name="commit" value="実行" class="btn btn-default btn-default"  v-on:click.stop.prevent="execute_all" />
+            <input type="submit" name="commit" value="停止" class="btn btn-default btn-default"  v-on:click.stop.prevent="halt = true" />
+            <input type="submit" name="commit" value="レジスタリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_register" />
+            <input type="submit" name="commit" value="メモリリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_memory" />
+          </div>
+          <div class="col-xs-4">
+            <input type="submit" name="commit" value="エクスポート" class="btn btn-default btn-primary" v-on:click.stop.prevent="export" />
+            <input type="submit" name="commit" value="インポート" class="btn btn-default btn-default"  v-on:click.stop.prevent="import" />
+          </div>
+        </div>
+
+
+<!--       <pre>
         {{ $data | json 2}}
-      </pre>
+      </pre> -->
 
     </div>
   </body>

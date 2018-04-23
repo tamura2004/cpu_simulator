@@ -1,5 +1,5 @@
 var MEMORY = []
-var PGM = "33,41,30,5,50,14, 23,4,4,1,50,24, 23,4,14,51,35,22, 32,42,54,31,44,45, 51,5,14,11,3,34, 0,0,0,0,0,0"
+var PGM = "35,50,12,21,23,4,0,1,22,50,22,23,4,12,31,42,54,31,44,45,51,0,0,0,10,1,5,2,4,3,0,0,0,0,0,0"
 var codes = PGM.split(',');
 for(var i = 0; i < 36; i++){
   MEMORY.push({
@@ -53,12 +53,13 @@ new Vue({
     name: "red moon",
     pc: 0,
     sp: 55,
-    a: 0,
-    ix: 0,
-    iy: 0,
+    a: 5,
+    ix: 40,
+    iy: 40,
     flag: 0,
     halt: false,
     message: [],
+    code: [],
     msg: '',
     opecode: 0,
     operand: 0,
@@ -223,8 +224,19 @@ new Vue({
         this.operand = null;
       }
 
-      // ログ出力
-      this.add_message(this.msg)
+    },
+
+    export: function(){
+      this.pc = 0;
+      this.code = [];
+
+      while(this.pc < 54){
+        var pc = this.pc;
+        this.fetch();
+        this.code.push(String(pc) + ": " + this.msg);
+      }
+
+      this.pc = 0;
     },
 
     reset_register: function(){
@@ -267,6 +279,7 @@ new Vue({
 
     execute: function(event){
       this.fetch();
+      this.add_message(this.msg)
 
       switch(this.params[0]) {
         case 'NOP':
@@ -279,7 +292,6 @@ new Vue({
         case 'JMP':
           switch(this.params[1]){
             case 'NZ':
-              console.log(this.flag);
               if(this.flag == 1){
                 break;
               }
