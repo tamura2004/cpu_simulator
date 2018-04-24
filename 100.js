@@ -1,50 +1,89 @@
 var MEMORY = []
-// var PGM = "35,50,12,21,23,4,0,1,22,50,22,23,4,12,31,42,54,31,44,45,51,0,0,0,10,1,5,2,4,3,0,0,0,0,0,0"
-// var codes = PGM.split(',');
+var PGM = "27,26,5,14,64,72,1,99"
+var codes = PGM.split(',');
 for(var i = 0; i < 100; i++){
   MEMORY.push({
     id: i,
-    val: 0
+    val: codes[i] || 0
   });
 }
 
 var NIMONIC = {
-  0: 'NOP',
-  1: 'HALT',
-  2: 'RAND',
-  3: 'JMP AL n',
-  4: 'JMP NZ n',
-  5: 'JMP NC n',
-  10: 'PUSH A',
-  11: 'PUSH IX',
-  12: 'PUSH IY',
-  13: 'POP A',
-  14: 'POP IX',
-  15: 'POP IY',
-  20: 'INC A',
-  21: 'INC IX',
-  22: 'INC IY',
-  23: 'DEC A',
-  24: 'DEC IX',
-  25: 'DEC IY',
-  30: 'LD A n',
-  31: 'LD A [IX]',
-  32: 'LD A [IY]',
-  33: 'LD IX n',
-  34: 'LD IX IY',
-  35: 'LD IY IX',
-  40: 'ADD A [IX]',
-  41: 'ADD A [IY]',
-  42: 'SUB A [IX]',
-  43: 'SUB A [IY]',
-  44: 'LD [IX] [IY]',
-  45: 'LD [IY] A',
-  50: 'CALL AL n',
-  51: 'RET AL',
-  52: 'RET Z',
-  53: 'RET NZ',
-  54: 'RET C',
-  55: 'RET NC'
+   0: 'NOP',
+   1: 'LD A IX',
+   2: 'LD A IY',
+   3: 'LD A [IX]',
+   4: 'LD A [IY]',
+   5: 'LD A n',
+   6: 'INC A',
+   7: 'DEC A',
+   8: 'PUSH A',
+   9: 'POP A',
+  10: 'LD IX A',
+  12: 'LD IX IY',
+  13: 'LD IX [IX]',
+  14: 'LD IX [IY]',
+  15: 'LD IX n',
+  16: 'INC IX',
+  17: 'DEC IX',
+  18: 'PUSH IX',
+  19: 'POP IX',
+  20: 'LD IY A',
+  21: 'LD IY IX',
+  23: 'LD IY [IX]',
+  24: 'LD IY [IY]',
+  25: 'LD IY n',
+  26: 'INC IY',
+  27: 'DEC IY',
+  28: 'PUSH IY',
+  29: 'POP IY',
+  30: 'LD [IX] A',
+  31: 'LD [IX] IX',
+  32: 'LD [IX] IY',
+  34: 'LD [IX] [IY]',
+  35: 'LD [IX] n',
+  36: 'INC [IX]',
+  37: 'DEC [IX]',
+  38: 'PUSH [IX]',
+  39: 'POP [IX]',
+  40: 'LD [IY] A',
+  41: 'LD [IY] IX',
+  42: 'LD [IY] IY',
+  43: 'LD [IY] [IX]',
+  45: 'LD [IY] n',
+  46: 'INC [IY]',
+  47: 'DEC [IY]',
+  48: 'PUSH [IY]',
+  49: 'POP [IY]',
+  50: 'ADD A A',
+  51: 'ADD A IX',
+  52: 'ADD A IY',
+  53: 'ADD A [IX]',
+  54: 'ADD A [IY]',
+  55: 'ADD A n',
+  58: 'PUSH n',
+  60: 'SUB A A',
+  61: 'SUB A IX',
+  62: 'SUB A IY',
+  63: 'SUB A [IX]',
+  64: 'SUB A [IY]',
+  65: 'SUB A n',
+  70: 'JMP E n',
+  71: 'JMP Z n',
+  72: 'JMP NZ n',
+  73: 'JMP C n',
+  74: 'JMP NC n',
+  80: 'CALL E n',
+  81: 'CALL Z n',
+  82: 'CALL NZ n',
+  83: 'CALL C n',
+  84: 'CALL NC n',
+  90: 'RET E',
+  91: 'RET Z',
+  92: 'RET NZ',
+  93: 'RET C',
+  94: 'RET NC',
+  99: 'HALT'
 }
 
 new Vue({
@@ -238,7 +277,7 @@ new Vue({
       this.pc = 0;
       this.code = [];
 
-      while(this.pc < 90){
+      while(this.pc < 70){
         var pc = this.pc;
         this.fetch();
         if(this.msg != 'NOP'){
@@ -249,6 +288,22 @@ new Vue({
         this.code.push("エクスポートするコードがありません");
       }
       this.pc = 0;
+    },
+
+    set_random: function(){
+      for(var i = 70; i < 100; i++){
+        this.set_memory(i,Math.floor(Math.random()*100));
+      }
+    },
+
+    set_seqdata: function(){
+      for(var i = 70; i < 100; i++){
+        this.set_memory(i,99-i);
+      }
+    },
+
+    import: function(){
+
     },
 
     reset_register: function(){
@@ -305,17 +360,17 @@ new Vue({
         case 'JMP':
           switch(this.params[1]){
             case 'NZ':
-              if(this.flag == 1){
+              if(this.zero){
                 break;
               }
 
             case 'NC':
-              if(this.carry()){
+              if(this.carry){
                 break;
               }
 
-            case 'AL':
-              this.set('PC', this.params[2])
+            case 'E':
+              this.set('PC', this.operand)
               break;
           }
           break;
@@ -373,7 +428,7 @@ new Vue({
               if(this.carry()){
                 break;
               }
-            case 'AL':
+            case 'E':
               this.pop('PC');
               this.pop('A');
               break;

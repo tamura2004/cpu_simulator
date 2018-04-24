@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
     <link rel="stylesheet" href="100.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.js"></script>
   </head>
   <body>
     <nav class="navbar navbar-inverse">
@@ -103,12 +103,42 @@
             <input type="submit" name="commit" value="停止" class="btn btn-default btn-default"  v-on:click.stop.prevent="halt = true" />
             <input type="submit" name="commit" value="レジスタリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_register" />
             <input type="submit" name="commit" value="メモリリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_memory" />
+            <input type="submit" name="commit" value="乱数" class="btn btn-default btn-default"  v-on:click.stop.prevent="set_random" />
+            <input type="submit" name="commit" value="連番" class="btn btn-default btn-default"  v-on:click.stop.prevent="set_seqdata" />
           </div>
           <div class="col-xs-3">
             <input type="submit" name="commit" value="エクスポート" class="btn btn-default btn-primary" v-on:click.stop.prevent="export" />
             <input type="submit" name="commit" value="インポート" class="btn btn-default btn-default"  v-on:click.stop.prevent="import" />
           </div>
         </div>
+        <hr>
+        
+        <div class="row">
+          <h2>命令表</h2>
+          <table class="table table-condensed table-striped">
+            <thead>
+              <tr>
+                <th>\</th>
+                <th v-for="col in 10">
+                  {{col}}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in 10">
+                <td>
+                  <strong>
+                    {{ row*10 }}
+                  </strong>
+                </td>
+                <td v-for="col in 10">
+                  {{ table[row*10+col] }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <hr>
 
 <!--       <pre>
         {{ zero | json 2}}
