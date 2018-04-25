@@ -8,6 +8,20 @@ for(var i = 0; i < 100; i++){
   });
 }
 
+var OPECODE = [
+  {'cmd':'NOP', 'sample':'-', 'desc':'何もしない'},
+  {'cmd':'LD x y', 'sample':'x = y', 'desc':'xにyを代入する'},
+  {'cmd':'INC x', 'sample':'x++', 'desc':'xの値を1増加させる'},
+  {'cmd':'DEC x', 'sample':'x--', 'desc':'xの値を1増加させる'},
+  {'cmd':'ADD x y', 'sample':'x = x + y', 'desc':'足し算を行う'},
+  {'cmd':'SUB x y', 'sample':'x = x - y', 'desc':'引き算を行う'},
+  {'cmd':'PUSH x', 'sample':'x -> [SP--]', 'desc':'スタックの先頭に値を保存する'},
+  {'cmd':'POP x', 'sample':'x <- [++SP];', 'desc':'スタックの先頭から値を取り出す'},
+  {'cmd':'JMP n', 'sample':'goto n', 'desc':'次の処理は、アドレスnから開始する'},
+  {'cmd':'CALL f', 'sample':'f()', 'desc':'サブルーチン呼び出し'},
+  {'cmd':'RET', 'sample':'return', 'desc':'CALLで呼び出された場所に戻る'}
+];
+
 var NIMONIC = {
    0: 'NOP',
    1: 'LD A IX',
@@ -99,7 +113,7 @@ new Vue({
     carry: false,
     halt: false,
     message: [],
-    code: [],
+    code: '',
     msg: '',
     opecode: 0,
     operand: 0,
@@ -109,7 +123,8 @@ new Vue({
     nimonic: '',
     params: [],
     ms: MEMORY,
-    table: NIMONIC
+    table: NIMONIC,
+    opecodes: OPECODE,
   },
 
   methods: {
@@ -204,6 +219,7 @@ new Vue({
         case '[IX]':
         case '[IY]':
         case '[SP]':
+        case '[PC]':
           return this.set(this.get(name.substr(1,2)),val);
           break;
 
@@ -275,19 +291,20 @@ new Vue({
 
     export: function(){
       this.pc = 0;
-      this.code = [];
+      var codes = [];
 
       while(this.pc < 70){
         var pc = this.pc;
         this.fetch();
         if(this.msg != 'NOP'){
-          this.code.push(String(pc) + ":" + this.msg);
+          codes.push(String(pc) + ":" + this.msg);
         }
       }
-      if(this.code.length == 0){
-        this.code.push("エクスポートするコードがありません");
+      if(codes.length == 0){
+        codes.push("エクスポートするコードがありません");
       }
       this.pc = 0;
+      this.code = codes.join("\n");
     },
 
     set_random: function(){
@@ -303,7 +320,31 @@ new Vue({
     },
 
     import: function(){
+      this.pc = 0;
+      this.reset_memory();
+      var codes = this.code.split("\n");
 
+      for (var i = 0; i < codes.length; i++) {
+        this.nimonic = codes[i].toUpperCase();
+        this.nimonic = this.nimonic.replace(/^\d+:/,'');
+        this.params = this.nimonic.split(' ');
+        this.nimonic = this.nimonic.replace(/\d+$/,'n');
+        this.opecode = null;
+        this.operand = this.params[2];
+
+        for(opecode in this.table){
+          if(this.table[opecode] == this.nimonic){
+            this.set('[PC]', opecode);
+            this.inc_pc();
+
+            if(this.nimonic.match(/n$/)){
+              this.set('[PC]', Number(this.params[2]));
+              this.inc_pc();
+            }
+          }
+        }
+      }
+      this.pc = 0;
     },
 
     reset_register: function(){
@@ -357,24 +398,6 @@ new Vue({
           this.halt = true;
           break;
 
-        case 'JMP':
-          switch(this.params[1]){
-            case 'NZ':
-              if(this.zero){
-                break;
-              }
-
-            case 'NC':
-              if(this.carry){
-                break;
-              }
-
-            case 'E':
-              this.set('PC', this.operand)
-              break;
-          }
-          break;
-
         case 'PUSH':
           this.push(this.params[1]);
           break;
@@ -403,35 +426,47 @@ new Vue({
           this.a = this.sub(this.a, this.get(this.params[2]));
           break;
 
+        case 'JMP':
         case 'CALL':
-          this.push('A');
-          this.push('PC');
-          this.pc = this.operand;
-          break;
-
         case 'RET':
           switch(this.params[1]){
             case 'Z':
-              if(this.nonzero()){
+              if(!this.zero){
                 break;
               }
-            case 'NZ':
 
-              if(this.flag == 1){
+            case 'NZ':
+              if(this.zero){
                 break;
               }
+
             case 'C':
-              if(this.noncarry()){
+              if(!this.carry){
                 break;
               }
+
             case 'NC':
-              if(this.carry()){
+              if(this.carry){
                 break;
               }
+
             case 'E':
-              this.pop('PC');
-              this.pop('A');
-              break;
+              switch(this.params[0]){
+                case 'JMP':
+                  this.set('PC', this.operand)
+                  break;
+
+                case 'CALL':
+                  this.push('A');
+                  this.push('PC');
+                  this.pc = this.operand;
+                  break;
+
+                case 'RET':
+                  this.pop('PC');
+                  this.pop('A');
+                  break;
+              }
           }
           break;
 

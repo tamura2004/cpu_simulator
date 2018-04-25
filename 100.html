@@ -80,7 +80,7 @@
               <div class="col-xs-6">
                 <div class="form-group text optional code">
                   <label class="text optional control-label" for="code">コード</label>
-                  <textarea class="text optional form-control" name="code" id="code">{{code.join("\n")}}</textarea>
+                  <textarea v-model="code" class="text optional form-control" name="code" id="code"></textarea>
                 </div>
               </div>
 
@@ -114,29 +114,53 @@
         <hr>
         
         <div class="row">
-          <h2>命令表</h2>
-          <table class="table table-condensed table-striped">
-            <thead>
-              <tr>
-                <th>\</th>
-                <th v-for="col in 10">
-                  {{col*10}}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in 10">
-                <td>
-                  <strong>
-                    {{ row }}
-                  </strong>
-                </td>
-                <td v-for="col in 10">
-                  {{ table[row+col*10] }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="col-xs-12">
+            <h2>命令表</h2>
+            <table class="table table-condensed table-striped">
+              <thead>
+                <tr>
+                  <th>\</th>
+                  <th v-for="col in 10">
+                    {{col*10}}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in 10">
+                  <td>
+                    <strong>
+                      {{ row }}
+                    </strong>
+                  </td>
+                  <td v-for="col in 10">
+                    {{ table[row+col*10] }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-6">
+            <h2>オペコード一覧</h2>
+            <table class="table table-condensed table-striped">
+              <thead>
+                <tr>
+                  <th>オペコード</th>
+                  <th>例(Java)</th>
+                  <th>説明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="opecode in opecodes">
+                  <td>{{opecode.cmd}}</td>
+                  <td>{{opecode.sample}}</td>
+                  <td>{{opecode.desc}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <hr>
 
