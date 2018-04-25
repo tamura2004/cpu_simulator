@@ -244,20 +244,23 @@ new Vue({
       this.ms[addr].val = val;
     },
 
-    zero: function(){
-      return this.flag == 1;
-    },
+    check_condition: function(){
+      switch(this.params[1]){
+        case 'Z':
+          return this.zero;
 
-    nonzero: function(){
-      return this.flag != 1;
-    },
-    
-    carry: function(){
-      return this.flag == 2;
-    },
+        case 'NZ':
+          return !this.zero;
 
-    noncarry: function(){
-      return this.flag != 2;
+        case 'C':
+          return this.carry;
+
+        case 'NC':
+          return !this.carry;
+
+        case 'E':
+          return true;
+      }
     },
 
     push: function(name){
@@ -286,7 +289,6 @@ new Vue({
       }else{
         this.operand = null;
       }
-
     },
 
     export: function(){
@@ -427,46 +429,23 @@ new Vue({
           break;
 
         case 'JMP':
+          if(this.check_condition(this.params[1])){
+            this.set('PC', this.operand);
+          }
+          break;
+          
         case 'CALL':
+          if(this.check_condition(this.params[1])){
+            this.push('A');
+            this.push('PC');
+            this.pc = this.operand;
+          }
+          break;
+
         case 'RET':
-          switch(this.params[1]){
-            case 'Z':
-              if(!this.zero){
-                break;
-              }
-
-            case 'NZ':
-              if(this.zero){
-                break;
-              }
-
-            case 'C':
-              if(!this.carry){
-                break;
-              }
-
-            case 'NC':
-              if(this.carry){
-                break;
-              }
-
-            case 'E':
-              switch(this.params[0]){
-                case 'JMP':
-                  this.set('PC', this.operand)
-                  break;
-
-                case 'CALL':
-                  this.push('A');
-                  this.push('PC');
-                  this.pc = this.operand;
-                  break;
-
-                case 'RET':
-                  this.pop('PC');
-                  this.pop('A');
-                  break;
-              }
+          if(this.check_condition(this.params[1])){
+            this.pop('PC');
+            this.pop('A');
           }
           break;
 
