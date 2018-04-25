@@ -1,5 +1,5 @@
 var MEMORY = []
-var PGM = "27,26,5,14,64,72,1,99"
+var PGM = "5,7,15,50,6,16,30,70,3,99"
 var codes = PGM.split(',');
 for(var i = 0; i < 100; i++){
   MEMORY.push({
@@ -258,7 +258,7 @@ new Vue({
       this.opecode = this.get_memory(this.pc);
       this.inc_pc();
 
-      this.nimonic = this.table[this.opecode];
+      this.nimonic = this.table[this.opecode] || "HALT";
       this.msg = this.nimonic;
       this.params = this.nimonic.split(' ');
 
@@ -396,11 +396,11 @@ new Vue({
           break;
 
         case 'ADD':
-          this.a = this.add(this.a, this.val);
+          this.a = this.add(this.a, this.get(this.params[2]));
           break;
 
         case 'SUB':
-          this.a = this.sub(this.a, this.val);
+          this.a = this.sub(this.a, this.get(this.params[2]));
           break;
 
         case 'CALL':

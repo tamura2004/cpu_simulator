@@ -120,7 +120,7 @@
               <tr>
                 <th>\</th>
                 <th v-for="col in 10">
-                  {{col}}
+                  {{col*10}}
                 </th>
               </tr>
             </thead>
@@ -128,11 +128,11 @@
               <tr v-for="row in 10">
                 <td>
                   <strong>
-                    {{ row*10 }}
+                    {{ row }}
                   </strong>
                 </td>
                 <td v-for="col in 10">
-                  {{ table[row*10+col] }}
+                  {{ table[row+col*10] }}
                 </td>
               </tr>
             </tbody>
