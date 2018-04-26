@@ -1,50 +1,103 @@
 var MEMORY = []
-var PGM = "35,50,12,21,23,4,0,1,22,50,22,23,4,12,31,42,54,31,44,45,51,0,0,0,10,1,5,2,4,3,0,0,0,0,0,0"
+var PGM = "5,7,15,50,6,16,30,70,3,99"
 var codes = PGM.split(',');
-for(var i = 0; i < 36; i++){
+for(var i = 0; i < 100; i++){
   MEMORY.push({
-    id: Number(i.toString(6)),
-    val: Number(codes[i])
+    id: i,
+    val: codes[i] || 0
   });
 }
 
+var OPECODE = [
+  {'cmd':'NOP', 'sample':'-', 'desc':'何もしない'},
+  {'cmd':'LD x y', 'sample':'x = y', 'desc':'xにyを代入する'},
+  {'cmd':'INC x', 'sample':'x++', 'desc':'xの値を1増加させる'},
+  {'cmd':'DEC x', 'sample':'x--', 'desc':'xの値を1増加させる'},
+  {'cmd':'ADD x y', 'sample':'x = x + y', 'desc':'足し算を行う'},
+  {'cmd':'SUB x y', 'sample':'x = x - y', 'desc':'引き算を行う'},
+  {'cmd':'PUSH x', 'sample':'x -> [SP--]', 'desc':'スタックの先頭に値を保存する'},
+  {'cmd':'POP x', 'sample':'x <- [++SP];', 'desc':'スタックの先頭から値を取り出す'},
+  {'cmd':'JMP n', 'sample':'goto n', 'desc':'次の処理は、アドレスnから開始する'},
+  {'cmd':'CALL f', 'sample':'f()', 'desc':'サブルーチン呼び出し'},
+  {'cmd':'RET', 'sample':'return', 'desc':'CALLで呼び出された場所に戻る'}
+];
+
 var NIMONIC = {
-  0: 'NOP',
-  1: 'HALT',
-  2: 'RAND',
-  3: 'JMP AL n',
-  4: 'JMP NZ n',
-  5: 'JMP NC n',
-  10: 'PUSH A',
-  11: 'PUSH IX',
-  12: 'PUSH IY',
-  13: 'POP A',
-  14: 'POP IX',
-  15: 'POP IY',
-  20: 'INC A',
-  21: 'INC IX',
-  22: 'INC IY',
-  23: 'DEC A',
-  24: 'DEC IX',
-  25: 'DEC IY',
-  30: 'LD A n',
-  31: 'LD A [IX]',
-  32: 'LD A [IY]',
-  33: 'LD IX n',
-  34: 'LD IX IY',
-  35: 'LD IY IX',
-  40: 'ADD A [IX]',
-  41: 'ADD A [IY]',
-  42: 'SUB A [IX]',
-  43: 'SUB A [IY]',
-  44: 'LD [IX] [IY]',
-  45: 'LD [IY] A',
-  50: 'CALL AL n',
-  51: 'RET AL',
-  52: 'RET Z',
-  53: 'RET NZ',
-  54: 'RET C',
-  55: 'RET NC'
+   0: 'NOP',
+   1: 'LD A IX',
+   2: 'LD A IY',
+   3: 'LD A [IX]',
+   4: 'LD A [IY]',
+   5: 'LD A n',
+   6: 'INC A',
+   7: 'DEC A',
+   8: 'PUSH A',
+   9: 'POP A',
+  10: 'LD IX A',
+  12: 'LD IX IY',
+  13: 'LD IX [IX]',
+  14: 'LD IX [IY]',
+  15: 'LD IX n',
+  16: 'INC IX',
+  17: 'DEC IX',
+  18: 'PUSH IX',
+  19: 'POP IX',
+  20: 'LD IY A',
+  21: 'LD IY IX',
+  23: 'LD IY [IX]',
+  24: 'LD IY [IY]',
+  25: 'LD IY n',
+  26: 'INC IY',
+  27: 'DEC IY',
+  28: 'PUSH IY',
+  29: 'POP IY',
+  30: 'LD [IX] A',
+  31: 'LD [IX] IX',
+  32: 'LD [IX] IY',
+  34: 'LD [IX] [IY]',
+  35: 'LD [IX] n',
+  36: 'INC [IX]',
+  37: 'DEC [IX]',
+  38: 'PUSH [IX]',
+  39: 'POP [IX]',
+  40: 'LD [IY] A',
+  41: 'LD [IY] IX',
+  42: 'LD [IY] IY',
+  43: 'LD [IY] [IX]',
+  45: 'LD [IY] n',
+  46: 'INC [IY]',
+  47: 'DEC [IY]',
+  48: 'PUSH [IY]',
+  49: 'POP [IY]',
+  50: 'ADD A A',
+  51: 'ADD A IX',
+  52: 'ADD A IY',
+  53: 'ADD A [IX]',
+  54: 'ADD A [IY]',
+  55: 'ADD A n',
+  58: 'PUSH n',
+  60: 'SUB A A',
+  61: 'SUB A IX',
+  62: 'SUB A IY',
+  63: 'SUB A [IX]',
+  64: 'SUB A [IY]',
+  65: 'SUB A n',
+  70: 'JMP E n',
+  71: 'JMP Z n',
+  72: 'JMP NZ n',
+  73: 'JMP C n',
+  74: 'JMP NC n',
+  80: 'CALL E n',
+  81: 'CALL Z n',
+  82: 'CALL NZ n',
+  83: 'CALL C n',
+  84: 'CALL NC n',
+  90: 'RET E',
+  91: 'RET Z',
+  92: 'RET NZ',
+  93: 'RET C',
+  94: 'RET NC',
+  99: 'HALT'
 }
 
 new Vue({
@@ -52,14 +105,15 @@ new Vue({
   data: {
     name: "red moon",
     pc: 0,
-    sp: 55,
-    a: 5,
-    ix: 40,
-    iy: 40,
-    flag: 0,
+    sp: 99,
+    a: 0,
+    ix: 50,
+    iy: 70,
+    zero: false,
+    carry: false,
     halt: false,
     message: [],
-    code: [],
+    code: '',
     msg: '',
     opecode: 0,
     operand: 0,
@@ -69,40 +123,48 @@ new Vue({
     nimonic: '',
     params: [],
     ms: MEMORY,
-    table: NIMONIC
+    table: NIMONIC,
+    opecodes: OPECODE,
   },
 
   methods: {
-    to10: function(a) {
-      return parseInt(a,6);
-    },
-
-    to6: function(a) {
-      return Number(a.toString(6));
-    },
-
-    mod36: function(a) {
-      a = (a + 36) % 36;
-      return a;
-    },
-
     add: function(a,b){
-      return this.to6(this.mod36(this.to10(a) + this.to10(b)));
+      this.zero = false;
+      this.carry = false;
+
+      if((a+b)%100==0){
+        this.zero = true;
+      }else if(a+b>=100){
+        this.carry = true;
+      }
+      return (a+b)%100;
     },
 
     sub: function(a,b){
+      this.zero = false;
+      this.carry = false;
+
       if(a == b){
-        this.flag = 1;
+        this.zero = true;
       }else if(a < b){
-        this.flag = 2;
-      }else{
-        this.flag = 0;
+        this.carry = true;
+
       }
-      return this.to6(this.mod36(this.to10(a) - this.to10(b)));
+      return (a-b+100)%100;
     },
 
     inc: function(name){
       this.set(name, this.add(this.get(name), 1));
+    },
+
+    inc_pc: function(){
+      if(this.pc == 99){
+        this.pc = 0;
+        return true;
+      }else{
+        this.pc ++;
+        return false;
+      }
     },
 
     dec: function(name){
@@ -157,6 +219,7 @@ new Vue({
         case '[IX]':
         case '[IY]':
         case '[SP]':
+        case '[PC]':
           return this.set(this.get(name.substr(1,2)),val);
           break;
 
@@ -170,7 +233,7 @@ new Vue({
     },
 
     get_memory: function(addr){
-      return this.ms[this.to10(addr)].val;
+      return this.ms[addr].val;
     },
 
     set_register: function(name,val){
@@ -178,23 +241,26 @@ new Vue({
     },
     
     set_memory: function(addr,val){
-      this.ms[this.to10(addr)].val = val;
+      this.ms[addr].val = val;
     },
 
-    zero: function(){
-      return this.flag == 1;
-    },
+    check_condition: function(){
+      switch(this.params[1]){
+        case 'Z':
+          return this.zero;
 
-    nonzero: function(){
-      return this.flag != 1;
-    },
-    
-    carry: function(){
-      return this.flag == 2;
-    },
+        case 'NZ':
+          return !this.zero;
 
-    noncarry: function(){
-      return this.flag != 2;
+        case 'C':
+          return this.carry;
+
+        case 'NC':
+          return !this.carry;
+
+        case 'E':
+          return true;
+      }
     },
 
     push: function(name){
@@ -209,49 +275,94 @@ new Vue({
 
     fetch: function(){
       this.opecode = this.get_memory(this.pc);
-      this.inc('PC');
+      this.inc_pc();
 
-      this.nimonic = this.table[this.opecode];
+      this.nimonic = this.table[this.opecode] || "HALT";
       this.msg = this.nimonic;
       this.params = this.nimonic.split(' ');
 
       // オペランドの読み込み
       if(this.params[2] == 'n'){
         this.operand = this.get_memory(this.pc);
-        this.inc('PC');
+        this.inc_pc();
         this.msg = this.msg.replace(/n$/,this.operand);
       }else{
         this.operand = null;
       }
-
     },
 
     export: function(){
       this.pc = 0;
-      this.code = [];
+      var codes = [];
 
-      while(this.pc < 54){
+      while(this.pc < 70){
         var pc = this.pc;
         this.fetch();
-        this.code.push(String(pc) + ": " + this.msg);
+        if(this.msg != 'NOP'){
+          codes.push(String(pc) + ":" + this.msg);
+        }
       }
+      if(codes.length == 0){
+        codes.push("エクスポートするコードがありません");
+      }
+      this.pc = 0;
+      this.code = codes.join("\n");
+    },
 
+    set_random: function(){
+      for(var i = 70; i < 100; i++){
+        this.set_memory(i,Math.floor(Math.random()*100));
+      }
+    },
+
+    set_seqdata: function(){
+      for(var i = 70; i < 100; i++){
+        this.set_memory(i,99-i);
+      }
+    },
+
+    import: function(){
+      this.pc = 0;
+      this.reset_memory();
+      var codes = this.code.split("\n");
+
+      for (var i = 0; i < codes.length; i++) {
+        this.nimonic = codes[i].toUpperCase();
+        this.nimonic = this.nimonic.replace(/^\d+:/,'');
+        this.params = this.nimonic.split(' ');
+        this.nimonic = this.nimonic.replace(/\d+$/,'n');
+        this.opecode = null;
+        this.operand = this.params[2];
+
+        for(opecode in this.table){
+          if(this.table[opecode] == this.nimonic){
+            this.set('[PC]', opecode);
+            this.inc_pc();
+
+            if(this.nimonic.match(/n$/)){
+              this.set('[PC]', Number(this.params[2]));
+              this.inc_pc();
+            }
+          }
+        }
+      }
       this.pc = 0;
     },
 
     reset_register: function(){
       this.pc = 0;
       this.a = 0;
-      this.ix = 0;
-      this.iy = 0;
-      this.flag = 0;
+      this.ix = 50;
+      this.iy = 70;
       this.halt = false;
-      this.sp = 55;
+      this.zero = false;
+      this.carry = false;
+      this.sp = 99;
       this.message = [];
     },
 
     reset_memory: function(){
-      for(var i = 0; i < 36; i++){
+      for(var i = 0; i < 100; i++){
         this.ms[i].val = 0;
       }
     },
@@ -289,24 +400,6 @@ new Vue({
           this.halt = true;
           break;
 
-        case 'JMP':
-          switch(this.params[1]){
-            case 'NZ':
-              if(this.flag == 1){
-                break;
-              }
-
-            case 'NC':
-              if(this.carry()){
-                break;
-              }
-
-            case 'AL':
-              this.set('PC', this.params[2])
-              break;
-          }
-          break;
-
         case 'PUSH':
           this.push(this.params[1]);
           break;
@@ -328,42 +421,31 @@ new Vue({
           break;
 
         case 'ADD':
-          this.a = this.add(this.a, this.val);
+          this.a = this.add(this.a, this.get(this.params[2]));
           break;
 
         case 'SUB':
-          this.a = this.sub(this.a, this.val);
+          this.a = this.sub(this.a, this.get(this.params[2]));
           break;
 
+        case 'JMP':
+          if(this.check_condition(this.params[1])){
+            this.set('PC', this.operand);
+          }
+          break;
+          
         case 'CALL':
-          this.push('A');
-          this.push('PC');
-          this.pc = this.operand;
+          if(this.check_condition(this.params[1])){
+            this.push('A');
+            this.push('PC');
+            this.pc = this.operand;
+          }
           break;
 
         case 'RET':
-          switch(this.params[1]){
-            case 'Z':
-              if(this.nonzero()){
-                break;
-              }
-            case 'NZ':
-
-              if(this.flag == 1){
-                break;
-              }
-            case 'C':
-              if(this.noncarry()){
-                break;
-              }
-            case 'NC':
-              if(this.carry()){
-                break;
-              }
-            case 'AL':
-              this.pop('PC');
-              this.pop('A');
-              break;
+          if(this.check_condition(this.params[1])){
+            this.pop('PC');
+            this.pop('A');
           }
           break;
 

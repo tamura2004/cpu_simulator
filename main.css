@@ -14,34 +14,54 @@
  *= require_self
  */
 
+.container-fluid {
+  margin-left: 16px;
+}
+
 input.numeric {
-  height: 48px;
-  width: 72px;
-  font-size: 28px;
+  height: 32px;
+  width: 80%;
+  font-size: 24px;
   font-weight: bold;
+  padding: 4px;
 }
 
 input#cpu_sp,
 input#cpu_pc,
 input#cpu_a,
-input#cpu_b,
+input#cpu_ix,
+input#cpu_iy,
 input#cpu_f
 {
-  width: 96px;
+  width: 60%;
 }
 
 input#cpu_pc,
 input.pc
 {
   /*background: #ff7675;*/
-  background: #db8f86;
+  /*background: #db8f86;*/
+  background: #ecc;
+}
+
+input#cpu_ix,
+input.ix
+{
+  background: #cec;
+}
+
+input#cpu_iy,
+input.iy
+{
+  background: #eec;
 }
 
 input#cpu_sp,
 input.sp
 {
   /*background: #74b9ff;*/
-  background: #70c0ca;
+  /*background: #70c0ca;*/
+  background: #cee;
 }
 
 input.pc.sp {
@@ -52,7 +72,8 @@ textarea#cpu_message,
 textarea#code {
   resize: none;
   overflow: auto;
-  height: 446px;
+  height: 585px;
+  width: 90%;
 }
 
 #pc_name {

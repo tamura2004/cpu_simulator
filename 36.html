@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>　CPU演習</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="main.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-brand">6bit CPU </div>
+      </div>
+    </nav>
+    <div class="container" id="app">
+      <form class="form-horizontal">
+
+        <div class="row">
+          <div class="col-xs-2">
+
+            <div class="form-group">
+              <label class="control-label">PC</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_pc" v-model="pc" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">A</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_a" v-model="a" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">IX</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_ix" v-model="ix" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">IY</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_iy" v-model="iy" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">FLAG</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_flag" v-model="flag" number="" />
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">SP</label>
+              <input class="numeric form-control" type="number" step="1" id="cpu_sp" v-model="sp" number="" />
+            </div>
+
+          </div>
+
+          <div class="col-xs-1" v-for="col in 6">
+            <div class="form-group" v-for="m in ms | limitBy 6 (col*6)">
+              <label class="control-label">{{m.id}}</label>
+              <input class="numeric form-control" type="number" step="1" v-bind:class="{'pc':m.id == pc, 'sp':m.id == sp}" v-model="m.val" number="" />
+            </div>
+          </div>
+
+          <div class="col-xs-2">
+            <div class="form-group text optional cpu_message">
+              <label class="text optional control-label" for="cpu_message">メッセージ</label>
+              <textarea class="text optional form-control" name="cpu[message]" id="cpu_message">{{message.join("\n")}}</textarea>
+            </div>
+          </div>
+          <div class="col-xs-2">
+            <div class="form-group text optional code">
+              <label class="text optional control-label" for="code">コード</label>
+              <textarea class="text optional form-control" name="code" id="code" v-model="code"></textarea>
+            </div>
+          </div>
+        </div>
+        <hr />
+
+        <div class="row">
+          <div class="col-xs-8">
+            <input type="submit" name="commit" value="ステップ実行" class="btn btn-default btn-primary" v-on:click.stop.prevent="execute" />
+            <input type="submit" name="commit" value="実行" class="btn btn-default btn-default"  v-on:click.stop.prevent="execute_all" />
+            <input type="submit" name="commit" value="停止" class="btn btn-default btn-default"  v-on:click.stop.prevent="halt = true" />
+            <input type="submit" name="commit" value="レジスタリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_register" />
+            <input type="submit" name="commit" value="メモリリセット" class="btn btn-default btn-default"  v-on:click.stop.prevent="reset_memory" />
+          </div>
+          <div class="col-xs-4">
+            <input type="submit" name="commit" value="エクスポート" class="btn btn-default btn-primary" v-on:click.stop.prevent="export" />
+            <input type="submit" name="commit" value="インポート" class="btn btn-default btn-default"  v-on:click.stop.prevent="import" />
+          </div>
+        </div>
+
+
+      <pre>
+        {{ zero | json 2}}
+      </pre>
+
+    </div>
+  </body>
+  <script type="text/javascript" src="main.js"></script>
+</html>
