@@ -122,6 +122,8 @@ new Vue({
     val: 0,
     nimonic: '',
     params: [],
+    labels: {},
+    codesize: 0,
     ms: MEMORY,
     table: NIMONIC,
     opecodes: OPECODE,
@@ -324,25 +326,33 @@ new Vue({
 
     import: function(){
       this.reset_memory();
+      this.labels = {};
       var codes = this.code.split("\n");
-      var labels = {};
 
       this.pc = 0;
       for (var i = 0; i < codes.length; i++) {
         this.parse(codes[i])
         if(this.opecode == 'LABEL'){
-          labels[this.operand] = this.pc;
+          this.labels[this.operand] = this.pc;
         }
+        for (var i = 0; i < this.codesize; i++){
+          this.inc_pc();
+        }
+      }
 
-
-
+      this.pc = 0;
+      for (var i = 0; i < codes.length; i++) {
         for(opecode in this.table){
           if(this.table[opecode] == this.nimonic){
             this.set('[PC]', opecode);
             this.inc_pc();
 
             if(this.nimonic.match(/n$/)){
-              this.set('[PC]', Number(this.params[2]));
+              if(this.parms[2].match(/^\d+$/)){
+                this.set('[PC]', Number(this.operand));
+              }else{
+                this.set('[PC]', this.labels[this.operand]);
+              }
               this.inc_pc();
             }
           }
