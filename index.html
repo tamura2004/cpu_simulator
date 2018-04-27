@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>CPU演習</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="100.css" />
+    <link rel="stylesheet" href="main.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.js"></script>
   </head>
@@ -107,8 +107,8 @@
             <input type="submit" name="commit" value="連番" class="btn btn-default btn-default"  v-on:click.stop.prevent="set_seqdata" />
           </div>
           <div class="col-xs-3">
-            <input type="submit" name="commit" value="エクスポート" class="btn btn-default btn-primary" v-on:click.stop.prevent="export" />
-            <input type="submit" name="commit" value="インポート" class="btn btn-default btn-default"  v-on:click.stop.prevent="import" />
+            <input type="submit" name="commit" value="コンパイル" class="btn btn-default btn-primary"  v-on:click.stop.prevent="import" />
+            <input type="submit" name="commit" value="ダンプ" class="btn btn-default" v-on:click.stop.prevent="export" />
           </div>
         </div>
         <hr>
@@ -170,5 +170,5 @@
 
     </div>
   </body>
-  <script type="text/javascript" src="100.js"></script>
+  <script type="text/javascript" src="main.js"></script>
 </html>

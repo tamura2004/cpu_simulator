@@ -1,10 +1,10 @@
+// Deburis: minimal decimal cpu simulator for study
+
 var MEMORY = []
-var PGM = "5,7,15,50,6,16,30,70,3,99"
-var codes = PGM.split(',');
 for(var i = 0; i < 100; i++){
   MEMORY.push({
     id: i,
-    val: codes[i] || 0
+    val: 0
   });
 }
 
@@ -291,6 +291,7 @@ new Vue({
       }
     },
 
+
     export: function(){
       this.pc = 0;
       var codes = [];
@@ -322,17 +323,18 @@ new Vue({
     },
 
     import: function(){
-      this.pc = 0;
       this.reset_memory();
       var codes = this.code.split("\n");
+      var labels = {};
 
+      this.pc = 0;
       for (var i = 0; i < codes.length; i++) {
-        this.nimonic = codes[i].toUpperCase();
-        this.nimonic = this.nimonic.replace(/^\d+:/,'');
-        this.params = this.nimonic.split(' ');
-        this.nimonic = this.nimonic.replace(/\d+$/,'n');
-        this.opecode = null;
-        this.operand = this.params[2];
+        this.parse(codes[i])
+        if(this.opecode == 'LABEL'){
+          labels[this.operand] = this.pc;
+        }
+
+
 
         for(opecode in this.table){
           if(this.table[opecode] == this.nimonic){
@@ -347,6 +349,29 @@ new Vue({
         }
       }
       this.pc = 0;
+    },
+
+    parse: function(line) {
+      this.nimonic = line.toUpperCase();
+      this.nimonic = this.nimonic.replace(/^\d+:/,''); //行番号削除
+      this.params = this.nimonic.split(' ');
+
+      this.nimonic = this.nimonic.replace(/\d+$/,'n');
+      this.nimonic = this.nimonic.replace(/:.*$/,'n');
+
+      if(this.params[0].match(/^:/)){
+        this.opecode = 'LABEL';
+        this.operand = this.params[0];
+        this.codesize = 0;
+      }else{
+        this.opecode = this.params[0];
+        this.operand = this.params[2];
+        if(this.nimonic.match(/n$/)){
+          this.codesize = 2;
+        }else{
+          this.codesize = 1;
+        }
+      }
     },
 
     reset_register: function(){
