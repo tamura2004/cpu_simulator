@@ -152,6 +152,12 @@ new Vue({
     addr: 0,
     val: 0,
     nimonic: '',
+    ast: {
+      code: '',
+      dst: '',
+      src: '',
+      length: 0,
+    },
     params: [],
     labels: {},
     codesize: 0,
@@ -374,28 +380,34 @@ new Vue({
 
       this.pc = 0;
       for (var i = 0; i < codes.length; i++) {
-        this.parse(codes[i])
-        if(this.opecode == 'LABEL'){
-          this.labels[this.operand] = this.pc;
+        this.set_ast(codes[i])
+
+        if(this.ast.code == 'LABEL'){
+          this.labels[this.ast.dst] = this.pc;
         }
-        for (var i = 0; i < this.codesize; i++){
+        for (var i = 0; i < this.ast.length; i++){
           this.inc_pc();
         }
       }
 
       this.pc = 0;
       for (var i = 0; i < codes.length; i++) {
-        opecode = this.reverse[this.nimonic];
-        if(opecode){
+        this.set_ast(codes[i])
+        if (this.ast.code == 'NULL'){
+          continue;
+        }
 
-          this.set('[PC]', opecode);
+        this.opecode = this.reverse[this.nimonic];
+        if(this.opecode){
+
+          this.set('[PC]', this.opecode);
           this.inc_pc();
 
           if(this.nimonic.match(/n$/)){
-            if(this.params[2].match(/^\d+$/)){
+            if(this.ast.dst.match(/^\d+$/)){
               this.set('[PC]', Number(this.operand));
-            }else{
-              this.set('[PC]', this.labels[this.operand]);
+            }else if(this.ast.dst.match(/^:.*$/)){
+              this.set('[PC]', this.labels[this.ast.dst]);
             }
             this.inc_pc();
           }
@@ -404,25 +416,33 @@ new Vue({
       this.pc = 0;
     },
 
-    parse: function(line) {
+    set_ast: function(line) {
+      if (line == ''){
+        this.ast.code = 'NULL';
+        this.ast.length = 0;
+        return
+      }
+
       this.nimonic = line.toUpperCase();
       this.nimonic = this.nimonic.replace(/^\d+:/,''); //行番号削除
       this.params = this.nimonic.split(' ');
 
       this.nimonic = this.nimonic.replace(/\d+$/,'n');
-      this.nimonic = this.nimonic.replace(/:.*$/,'n');
+      this.nimonic = this.nimonic.replace(/:.*$/,'n'); // ラベルを変換
 
       if(this.params[0].match(/^:/)){
-        this.opecode = 'LABEL';
-        this.operand = this.params[0];
-        this.codesize = 0;
+        this.ast.code = 'LABEL';
+        this.ast.dst = this.params[0];
+        this.ast.src = '';
+        this.ast.length = 0;
       }else{
-        this.opecode = this.params[0];
-        this.operand = this.params[2];
+        this.ast.code = this.params[0];
+        this.ast.dst = this.params[1];
+        this.ast.src = this.params[2];
         if(this.nimonic.match(/n$/)){
-          this.codesize = 2;
+          this.ast.length = 2;
         }else{
-          this.codesize = 1;
+          this.ast.length = 1;
         }
       }
     },
