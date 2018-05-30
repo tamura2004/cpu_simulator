@@ -1,7 +1,7 @@
 // Deburis: minimal decimal cpu simulator for study
 
 var MEMORY = []
-for(var i = 0; i < 100; i++){
+for(var i = 0; i < 40; i++){
   MEMORY.push({
     id: i,
     val: 0
@@ -22,93 +22,124 @@ var OPECODE = [
   {'cmd':'RET', 'sample':'return', 'desc':'CALLで呼び出された場所に戻る'}
 ];
 
-var NIMONIC = {
-   0: 'NOP',
-   1: 'LD A IX',
-   2: 'LD A IY',
-   3: 'LD A [IX]',
-   4: 'LD A [IY]',
-   5: 'LD A n',
-   6: 'INC A',
-   7: 'DEC A',
-   8: 'PUSH A',
-   9: 'POP A',
-  10: 'LD IX A',
-  12: 'LD IX IY',
-  13: 'LD IX [IX]',
-  14: 'LD IX [IY]',
-  15: 'LD IX n',
-  16: 'INC IX',
-  17: 'DEC IX',
-  18: 'PUSH IX',
-  19: 'POP IX',
-  20: 'LD IY A',
-  21: 'LD IY IX',
-  23: 'LD IY [IX]',
-  24: 'LD IY [IY]',
-  25: 'LD IY n',
-  26: 'INC IY',
-  27: 'DEC IY',
-  28: 'PUSH IY',
-  29: 'POP IY',
-  30: 'LD [IX] A',
-  31: 'LD [IX] IX',
-  32: 'LD [IX] IY',
-  34: 'LD [IX] [IY]',
-  35: 'LD [IX] n',
-  36: 'INC [IX]',
-  37: 'DEC [IX]',
-  38: 'PUSH [IX]',
-  39: 'POP [IX]',
-  40: 'LD [IY] A',
-  41: 'LD [IY] IX',
-  42: 'LD [IY] IY',
-  43: 'LD [IY] [IX]',
-  45: 'LD [IY] n',
-  46: 'INC [IY]',
-  47: 'DEC [IY]',
-  48: 'PUSH [IY]',
-  49: 'POP [IY]',
-  50: 'ADD A A',
-  51: 'ADD A IX',
-  52: 'ADD A IY',
-  53: 'ADD A [IX]',
-  54: 'ADD A [IY]',
-  55: 'ADD A n',
-  58: 'PUSH n',
-  60: 'SUB A A',
-  61: 'SUB A IX',
-  62: 'SUB A IY',
-  63: 'SUB A [IX]',
-  64: 'SUB A [IY]',
-  65: 'SUB A n',
-  70: 'JMP E n',
-  71: 'JMP Z n',
-  72: 'JMP NZ n',
-  73: 'JMP C n',
-  74: 'JMP NC n',
-  80: 'CALL E n',
-  81: 'CALL Z n',
-  82: 'CALL NZ n',
-  83: 'CALL C n',
-  84: 'CALL NC n',
-  90: 'RET E',
-  91: 'RET Z',
-  92: 'RET NZ',
-  93: 'RET C',
-  94: 'RET NC',
-  99: 'HALT'
+var NIMONIC = [
+ 'LD A B',
+ 'LD A C',
+ 'LD A [B]',
+ 'LD A [C]',
+ 'LD A n',
+ 'LD B A',
+ 'LD B C',
+ 'LD B [B]',
+ 'LD B [C]',
+ 'LD B n',
+ 'LD C A',
+ 'LD C B',
+ 'LD C [B]',
+ 'LD C [C]',
+ 'LD C n',
+ 'LD [B] A',
+ 'LD [B] B',
+ 'LD [B] C',
+ 'LD [B] [C]',
+ 'LD [B] n',
+ 'LD [C] A',
+ 'LD [C] B',
+ 'LD [C] C',
+ 'LD [C] [B]',
+ 'LD [C] n',
+ 'JMP E n',
+ 'JMP Z n',
+ 'JMP NZ n',
+ 'JMP C n',
+ 'JMP NC n',
+ 'RET E n',
+ 'RET Z n',
+ 'RET NZ n',
+ 'RET C n',
+ 'RET NC n',
+ 'CALL E n',
+ 'CALL Z n',
+ 'CALL NZ n',
+ 'CALL C n',
+ 'CALL NC n',
+ 'CMP A B',
+ 'CMP A C',
+ 'CMP A [B]',
+ 'CMP A [C]',
+ 'CMP A n',
+ 'CMP B A',
+ 'CMP B C',
+ 'CMP B [B]',
+ 'CMP B [C]',
+ 'CMP B n',
+ 'ADD A B',
+ 'ADD A C',
+ 'ADD A [B]',
+ 'ADD A [C]',
+ 'ADD A n',
+ 'ADD B A',
+ 'ADD B C',
+ 'ADD B [B]',
+ 'ADD B [C]',
+ 'ADD B n',
+ 'SUB A B',
+ 'SUB A C',
+ 'SUB A [B]',
+ 'SUB A [C]',
+ 'SUB A n',
+ 'SUB B A',
+ 'SUB B C',
+ 'SUB B [B]',
+ 'SUB B [C]',
+ 'SUB B n',
+ 'POP A',
+ 'POP B',
+ 'POP C',
+ 'PUSH A',
+ 'PUSH B',
+ 'PUSH C',
+ 'AND A B',
+ 'AND A C',
+ 'AND A [B]',
+ 'AND A [C]',
+ 'INC A',
+ 'INC B',
+ 'INC C',
+ 'DEC A',
+ 'DEC B',
+ 'DEC C',
+ 'OR A B',
+ 'OR A C',
+ 'OR A [B]',
+ 'OR A [C]',
+ 'EX A B',
+ 'EX B C',
+ 'EX A C',
+ 'EX A [B]',
+ 'EX A [C]',
+ 'EX B [B]',
+ 'EX B [C]',
+ 'EX C [B]',
+ 'EX C [C]',
+ 'HALT'
+]
+
+var ASSEMBLE = {}
+
+for(var i = 0; i < NIMONIC.length; i++){
+  ASSEMBLE[NIMONIC[i]] = i;
 }
 
 new Vue({
   el: "#app",
   data: {
-    name: "red moon",
+    name: "debris",
     pc: 0,
-    sp: 99,
+    sp: 39,
     a: 0,
-    ix: 50,
-    iy: 70,
+    b: 20,
+    c: 0,
     zero: false,
     carry: false,
     halt: false,
@@ -126,6 +157,7 @@ new Vue({
     codesize: 0,
     ms: MEMORY,
     table: NIMONIC,
+    reverse: ASSEMBLE,
     opecodes: OPECODE,
   },
 
@@ -150,9 +182,19 @@ new Vue({
         this.zero = true;
       }else if(a < b){
         this.carry = true;
-
       }
       return (a-b+100)%100;
+    },
+
+    cmp: function(a,b){
+      this.zero = false;
+      this.carry = false;
+
+      if(a == b){
+        this.zero = true;
+      }else if(a < b){
+        this.carry = true;
+      }
     },
 
     inc: function(name){
@@ -179,14 +221,16 @@ new Vue({
           return this.operand;
 
         case 'A':
-        case 'IX':
-        case 'IY':
+        case 'B':
+        case 'C':
         case 'SP':
         case 'PC':
           return this.get_register(name);
 
-        case '[IX]':
-        case '[IY]':
+        case '[B]':
+        case '[C]':
+          return this.get(this.get(name.substr(1,1)));
+
         case '[SP]':
           return this.get(this.get(name.substr(1,2)));
 
@@ -199,27 +243,27 @@ new Vue({
       switch(val){
         case 'n':
         case 'A':
-        case 'IX':
-        case 'IY':
+        case 'B':
+        case 'C':
         case 'SP':
         case 'PC':
-        case '[IX]':
-        case '[IY]':
+        case '[B]':
+        case '[C]':
         case '[SP]':
           val = this.get(val);
       }
       
       switch(name){
         case 'A':
-        case 'IX':
-        case 'IY':
+        case 'B':
+        case 'C':
         case 'SP':
         case 'PC':
           this.set_register(name,val);
           break;
 
-        case '[IX]':
-        case '[IY]':
+        case '[B]':
+        case '[C]':
         case '[SP]':
         case '[PC]':
           return this.set(this.get(name.substr(1,2)),val);
@@ -293,12 +337,11 @@ new Vue({
       }
     },
 
-
     export: function(){
       this.pc = 0;
       var codes = [];
 
-      while(this.pc < 70){
+      while(this.pc < 20){
         var pc = this.pc;
         this.fetch();
         if(this.msg != 'NOP'){
@@ -313,13 +356,13 @@ new Vue({
     },
 
     set_random: function(){
-      for(var i = 70; i < 100; i++){
+      for(var i = 20; i < 40; i++){
         this.set_memory(i,Math.floor(Math.random()*100));
       }
     },
 
     set_seqdata: function(){
-      for(var i = 70; i < 100; i++){
+      for(var i = 20; i < 40; i++){
         this.set_memory(i,99-i);
       }
     },
@@ -342,19 +385,19 @@ new Vue({
 
       this.pc = 0;
       for (var i = 0; i < codes.length; i++) {
-        for(opecode in this.table){
-          if(this.table[opecode] == this.nimonic){
-            this.set('[PC]', opecode);
-            this.inc_pc();
+        opecode = this.reverse[this.nimonic];
+        if(opecode){
 
-            if(this.nimonic.match(/n$/)){
-              if(this.parms[2].match(/^\d+$/)){
-                this.set('[PC]', Number(this.operand));
-              }else{
-                this.set('[PC]', this.labels[this.operand]);
-              }
-              this.inc_pc();
+          this.set('[PC]', opecode);
+          this.inc_pc();
+
+          if(this.nimonic.match(/n$/)){
+            if(this.params[2].match(/^\d+$/)){
+              this.set('[PC]', Number(this.operand));
+            }else{
+              this.set('[PC]', this.labels[this.operand]);
             }
+            this.inc_pc();
           }
         }
       }
@@ -387,17 +430,17 @@ new Vue({
     reset_register: function(){
       this.pc = 0;
       this.a = 0;
-      this.ix = 50;
-      this.iy = 70;
+      this.b = 20;
+      this.c = 0;
       this.halt = false;
       this.zero = false;
       this.carry = false;
-      this.sp = 99;
+      this.sp = 39;
       this.message = [];
     },
 
     reset_memory: function(){
-      for(var i = 0; i < 100; i++){
+      for(var i = 0; i < 40; i++){
         this.ms[i].val = 0;
       }
     },
@@ -427,6 +470,11 @@ new Vue({
       this.fetch();
       this.add_message(this.msg)
 
+      var p1 = this.params[1];
+      var p2 = this.params[2];
+      var v1 = this.get(p1);
+      var v2 = this.get(p2);
+
       switch(this.params[0]) {
         case 'NOP':
           break;
@@ -436,41 +484,45 @@ new Vue({
           break;
 
         case 'PUSH':
-          this.push(this.params[1]);
+          this.push(p1);
           break;
 
         case 'POP':
-          this.pop(this.params[1]);
+          this.pop(p1);
           break;
 
         case 'INC':
-          this.inc(this.params[1]);
+          this.inc(p1);
           break;
 
         case 'DEC':
-          this.dec(this.params[1]);
+          this.dec(p1);
           break;
 
         case 'LD':
-          this.set(this.params[1],this.params[2]);
+          this.set(p1,v2);
           break;
 
         case 'ADD':
-          this.a = this.add(this.a, this.get(this.params[2]));
+          this.set(p1,this.add(v1, v2));
           break;
 
         case 'SUB':
-          this.a = this.sub(this.a, this.get(this.params[2]));
+          this.set(p1,this.sub(v1, v2));
+          break;
+
+        case 'CMP':
+          p1,this.cmp(v1, v2);
           break;
 
         case 'JMP':
-          if(this.check_condition(this.params[1])){
+          if(this.check_condition(p1)){
             this.set('PC', this.operand);
           }
           break;
           
         case 'CALL':
-          if(this.check_condition(this.params[1])){
+          if(this.check_condition(p1)){
             this.push('A');
             this.push('PC');
             this.pc = this.operand;
@@ -478,7 +530,7 @@ new Vue({
           break;
 
         case 'RET':
-          if(this.check_condition(this.params[1])){
+          if(this.check_condition(p1)){
             this.pop('PC');
             this.pop('A');
           }

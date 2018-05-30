@@ -1,0 +1,29 @@
+Arguments: 
+  C:\binn\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add koko
+
+PATH: 
+  C:\tools\cmder\bin;C:\tools\cmder\vendor\conemu-maximus5\ConEmu\Scripts;C:\tools\cmder\vendor\conemu-maximus5;C:\tools\cmder\vendor\conemu-maximus5\ConEmu;C:\Program Files\Wireshark;D:\usr\bin\influxdb-1.5.2-1;C:\tools\ruby24\bin;C:\binn\PostgreSQL\9.4\bin;C:\binn\vim74-kaoriya-win64;d:\gowork\src\md5sum;C:\bin\hpl\bin;C:\bin\hpl\lib\extralibs\bin;C:\bin\hpl\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\bin\sqls\Tools\Binn\ManagementStudio\;C:\bin\sqls\Tools\Binn\;C:\bin\sqls\DTS\Binn\;d:\gowork\bin;C:\binn\nodejs\;C:\bin\hpl\mingw\bin;c:/bin/sphinx/bin;c:/bin/sphinx/python;c:/bin/sphinx/bin;c:/bin/sphinx/python/scripts;d:/play-2.0.4;C:\Program Files\Java\jdk1.7.0_45\bin;C:\HashiCorp\Vagrant\bin;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files (x86)\sbt\\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files\Microsoft SQL Server\110\DTS\Binn\;C:\ProgramData\chocolatey\bin;C:\Program Files\nodejs\;C:\Program Files (x86)\Yarn\bin;C:\Program Files\Git\cmd;C:\Program Files\OpenSSH-Win64;C:\tools\go\bin;;C:\Program Files\Mercurial;D:\usr\bin\ruby\bin;D:\usr\bin\xyzzy;C:\tools\cmder;C:\Users\tamura\AppData\Roaming\npm;C:\Program Files\Mercurial\;C:\Program Files\Sublime Text 3;C:\Users\tamura\AppData\Local\Programs\Fiddler;C:\Program Files\Git\usr\bin;C:\Program Files\Git\usr\share\vim\vim74;C:\tools\cmder\
+
+Yarn version: 
+  1.3.2
+
+Node version: 
+  9.3.0
+
+Platform: 
+  win32 x64
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: connect ETIMEDOUT 104.18.94.96:443
+      at Object._errnoException (util.js:999:13)
+      at _exceptionWithHostPort (util.js:1020:20)
+      at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1207:14)

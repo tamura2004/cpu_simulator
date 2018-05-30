@@ -20,17 +20,20 @@
 
 input.numeric {
   height: 32px;
-  width: 80%;
+  width: 90%;
   font-size: 24px;
   font-weight: bold;
   padding: 4px;
+  padding-right: 0px;
 }
 
 input#cpu_sp,
 input#cpu_pc,
 input#cpu_a,
-input#cpu_ix,
-input#cpu_iy,
+input#cpu_b,
+input#cpu_c,
+input#cpu_code,
+input#cpu_data,
 input#cpu_f
 {
   width: 60%;
@@ -44,14 +47,14 @@ input.pc
   background: #ecc;
 }
 
-input#cpu_ix,
-input.ix
+input#cpu_b,
+input.b
 {
   background: #cec;
 }
 
-input#cpu_iy,
-input.iy
+input#cpu_c,
+input.c
 {
   background: #eec;
 }
@@ -72,7 +75,7 @@ textarea#cpu_message,
 textarea#code {
   resize: none;
   overflow: auto;
-  height: 585px;
+  height: 292px;
   width: 90%;
 }
 
