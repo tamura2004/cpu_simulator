@@ -1,7 +1,10 @@
 // Deburis: minimal decimal cpu simulator for study
+var MEMORY_SIZE = 48;
+var INITIAL_B = 30;
+var INITIAL_C = INITIAL_B + 1;
 
-var MEMORY = []
-for(var i = 0; i < 40; i++){
+var MEMORY = [];
+for(var i = 0; i < MEMORY_SIZE; i++){
   MEMORY.push({
     id: i,
     val: 0
@@ -14,114 +17,62 @@ var OPECODE = [
   {'cmd':'INC x', 'sample':'x++', 'desc':'xの値を1増加させる'},
   {'cmd':'DEC x', 'sample':'x--', 'desc':'xの値を1増加させる'},
   {'cmd':'ADD x y', 'sample':'x = x + y', 'desc':'足し算を行う'},
-  {'cmd':'SUB x y', 'sample':'x = x - y', 'desc':'引き算を行う'},
-  {'cmd':'PUSH x', 'sample':'x -> [SP--]', 'desc':'スタックの先頭に値を保存する'},
-  {'cmd':'POP x', 'sample':'x <- [++SP];', 'desc':'スタックの先頭から値を取り出す'},
-  {'cmd':'JMP n', 'sample':'goto n', 'desc':'次の処理は、アドレスnから開始する'},
-  {'cmd':'CALL f', 'sample':'f()', 'desc':'サブルーチン呼び出し'},
-  {'cmd':'RET', 'sample':'return', 'desc':'CALLで呼び出された場所に戻る'}
+  {'cmd':'PUSH x', 'sample':'M[SP--] = x', 'desc':'スタックの先頭に値を保存する'},
+  {'cmd':'POP x', 'sample':'[++SP] = x', 'desc':'スタックの先頭から値を取り出す'},
+  {'cmd':'JMP n', 'sample':'[PC] = n', 'desc':'次の処理は、アドレスnから開始する'},
+  {'cmd':'CALL n', 'sample':'method(A)', 'desc':'サブルーチン呼び出し'},
+  {'cmd':'RET', 'sample':'return A', 'desc':'CALLで呼び出された場所に戻る'},
+  {'cmd':'HALT', 'sample':'-', 'desc':'処理を停止する'}
 ];
 
 var NIMONIC = [
+ 'NOP',
  'LD A B',
  'LD A C',
+ 'LD B C',
+ 'LD C B',
  'LD A [B]',
  'LD A [C]',
  'LD A n',
- 'LD B A',
- 'LD B C',
  'LD B [B]',
  'LD B [C]',
  'LD B n',
- 'LD C A',
- 'LD C B',
  'LD C [B]',
  'LD C [C]',
  'LD C n',
  'LD [B] A',
  'LD [B] B',
  'LD [B] C',
- 'LD [B] [C]',
- 'LD [B] n',
  'LD [C] A',
  'LD [C] B',
  'LD [C] C',
- 'LD [C] [B]',
- 'LD [C] n',
- 'JMP E n',
- 'JMP Z n',
- 'JMP NZ n',
- 'JMP C n',
+ 'JMP n',
  'JMP NC n',
- 'RET E n',
- 'RET Z n',
- 'RET NZ n',
- 'RET C n',
- 'RET NC n',
- 'CALL E n',
- 'CALL Z n',
- 'CALL NZ n',
- 'CALL C n',
- 'CALL NC n',
+ 'JMP NZ n',
  'CMP A B',
  'CMP A C',
- 'CMP A [B]',
- 'CMP A [C]',
  'CMP A n',
- 'CMP B A',
- 'CMP B C',
- 'CMP B [B]',
- 'CMP B [C]',
  'CMP B n',
+ 'CMP C n',
+ 'CMP [B] [C]',
+ 'EX [B] [C]',
  'ADD A B',
  'ADD A C',
- 'ADD A [B]',
- 'ADD A [C]',
  'ADD A n',
- 'ADD B A',
- 'ADD B C',
- 'ADD B [B]',
- 'ADD B [C]',
- 'ADD B n',
- 'SUB A B',
- 'SUB A C',
- 'SUB A [B]',
- 'SUB A [C]',
- 'SUB A n',
- 'SUB B A',
- 'SUB B C',
- 'SUB B [B]',
- 'SUB B [C]',
- 'SUB B n',
- 'POP A',
- 'POP B',
- 'POP C',
- 'PUSH A',
- 'PUSH B',
- 'PUSH C',
- 'AND A B',
- 'AND A C',
- 'AND A [B]',
- 'AND A [C]',
  'INC A',
  'INC B',
  'INC C',
  'DEC A',
  'DEC B',
  'DEC C',
- 'OR A B',
- 'OR A C',
- 'OR A [B]',
- 'OR A [C]',
- 'EX A B',
- 'EX B C',
- 'EX A C',
- 'EX A [B]',
- 'EX A [C]',
- 'EX B [B]',
- 'EX B [C]',
- 'EX C [B]',
- 'EX C [C]',
+ 'PUSH A',
+ 'PUSH B',
+ 'PUSH C',
+ 'POP A',
+ 'POP B',
+ 'POP C',
+ 'RET',
+ 'CALL n',
  'HALT'
 ]
 
@@ -136,13 +87,13 @@ new Vue({
   data: {
     name: "debris",
     pc: 0,
-    sp: 39,
+    sp: MEMORY_SIZE-1,
     a: 0,
-    b: 20,
-    c: 0,
+    b: INITIAL_B,
+    c: INITIAL_C,
     zero: false,
     carry: false,
-    halt: false,
+    halt: true,
     message: [],
     code: '',
     msg: '',
@@ -168,28 +119,85 @@ new Vue({
   },
 
   methods: {
-    add: function(a,b){
+    shuffle: function(array) {
+      var n = array.length, t, i;
+      while(n) {
+        i = Math.floor(Math.random() * n--);
+        t = array[n];
+        array[n] = array[i];
+        array[i] = t;
+      }
+      return array;
+    },
+
+    reset_register: function(){
+      this.pc = 0;
+      this.a = 0;
+      this.b = INITIAL_B;
+      this.c = INITIAL_C;
+      this.halt = false;
       this.zero = false;
       this.carry = false;
+      this.sp = MEMORY_SIZE-1;
+      this.message = [];
+    },
 
-      if((a+b)%100==0){
-        this.zero = true;
-      }else if(a+b>=100){
-        this.carry = true;
+    set_random: function(){
+      for(var i = INITIAL_B; i < MEMORY_SIZE; i++){
+        this.set_memory(i,Math.floor(Math.random()*MEMORY_SIZE));
       }
-      return (a+b)%100;
+    },
+
+    set_seqdata: function(){
+      for(var i = INITIAL_B; i < MEMORY_SIZE; i++){
+        this.set_memory(i,Math.floor(i/2));
+      }
+    },
+
+    set_linklist: function(){
+      var addr = [];
+      for(var i = 1; i < 6; i++){
+        addr.push(i);
+      }
+      addr = this.shuffle(addr);
+
+      var b = INITIAL_B;
+      for(var i = 0; i < addr.length; i++){
+        next = addr[i] * 2 + INITIAL_B;
+        this.set_memory(b, next);
+        this.set_memory(b+1, Math.floor(Math.random() * MEMORY_SIZE));
+        b = next;
+      }
+      this.set_memory(b,0);
+      this.set_memory(b+1,0);
+    },
+
+    add: function(a,b){
+      if (this.params[0] != 'POP') {
+        this.zero = false;
+        this.carry = false;
+
+        if((a+b)%MEMORY_SIZE==0){
+          this.zero = true;
+        }else if(a+b>=MEMORY_SIZE){
+          this.carry = true;
+        }
+      }
+      return (a+b)%MEMORY_SIZE;
     },
 
     sub: function(a,b){
-      this.zero = false;
-      this.carry = false;
+      if (this.params[0] != 'PUSH') {
+        this.zero = false;
+        this.carry = false;
 
-      if(a == b){
-        this.zero = true;
-      }else if(a < b){
-        this.carry = true;
+        if(a == b){
+          this.zero = true;
+        }else if(a < b){
+          this.carry = true;
+        }
       }
-      return (a-b+100)%100;
+      return (a-b+MEMORY_SIZE)%MEMORY_SIZE;
     },
 
     cmp: function(a,b){
@@ -208,7 +216,7 @@ new Vue({
     },
 
     inc_pc: function(){
-      if(this.pc == 99){
+      if(this.pc == MEMORY_SIZE-1){
         this.pc = 0;
         return true;
       }else{
@@ -235,13 +243,13 @@ new Vue({
 
         case '[B]':
         case '[C]':
-          return this.get(this.get(name.substr(1,1)));
+          return this.get_memory(this.get(name.substr(1,1)));
 
         case '[SP]':
-          return this.get(this.get(name.substr(1,2)));
+          return this.get_memory(this.get(name.substr(1,2)));
 
         default:
-          return this.get_memory(name);
+          return null;
       }
     },
 
@@ -270,6 +278,9 @@ new Vue({
 
         case '[B]':
         case '[C]':
+          return this.set(this.get(name.substr(1,1)),val);
+          break;
+
         case '[SP]':
         case '[PC]':
           return this.set(this.get(name.substr(1,2)),val);
@@ -285,7 +296,7 @@ new Vue({
     },
 
     get_memory: function(addr){
-      return this.ms[addr].val;
+      return Number(this.ms[addr].val);
     },
 
     set_register: function(name,val){
@@ -293,7 +304,7 @@ new Vue({
     },
     
     set_memory: function(addr,val){
-      this.ms[addr].val = val;
+      this.ms[addr].val = Number(val);
     },
 
     check_condition: function(){
@@ -310,7 +321,7 @@ new Vue({
         case 'NC':
           return !this.carry;
 
-        case 'E':
+        default:
           return true;
       }
     },
@@ -334,7 +345,7 @@ new Vue({
       this.params = this.nimonic.split(' ');
 
       // オペランドの読み込み
-      if(this.params[2] == 'n'){
+      if(this.params[2] == 'n' || this.params[1] == 'n'){
         this.operand = this.get_memory(this.pc);
         this.inc_pc();
         this.msg = this.msg.replace(/n$/,this.operand);
@@ -347,7 +358,7 @@ new Vue({
       this.pc = 0;
       var codes = [];
 
-      while(this.pc < 20){
+      while(this.pc < INITIAL_B){
         var pc = this.pc;
         this.fetch();
         if(this.msg != 'NOP'){
@@ -361,106 +372,47 @@ new Vue({
       this.code = codes.join("\n");
     },
 
-    set_random: function(){
-      for(var i = 20; i < 40; i++){
-        this.set_memory(i,Math.floor(Math.random()*100));
-      }
-    },
-
-    set_seqdata: function(){
-      for(var i = 20; i < 40; i++){
-        this.set_memory(i,99-i);
-      }
-    },
-
     import: function(){
       this.reset_memory();
-      this.labels = {};
-      var codes = this.code.split("\n");
-
+      this.reset_register();
       this.pc = 0;
-      for (var i = 0; i < codes.length; i++) {
-        this.set_ast(codes[i])
 
-        if(this.ast.code == 'LABEL'){
-          this.labels[this.ast.dst] = this.pc;
-        }
-        for (var i = 0; i < this.ast.length; i++){
-          this.inc_pc();
-        }
-      }
+      var lines = this.code.split("\n");
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].replace(/^\d+:/,"") // 行番号を取り除く
 
-      this.pc = 0;
-      for (var i = 0; i < codes.length; i++) {
-        this.set_ast(codes[i])
-        if (this.ast.code == 'NULL'){
+        if (line == ""){
+          continue; // 空行はスキップ
+        }
+
+        this.nimonic = line.toUpperCase().replace(/\d+$/,'n'); // 末尾の数字をnに変換
+        this.params = line.split(' ');
+
+        this.opecode = ASSEMBLE[this.nimonic]
+        if (!this.opecode) {
+          this.add_message('不明な命令です：' + line);
           continue;
         }
 
-        this.opecode = this.reverse[this.nimonic];
-        if(this.opecode){
+        this.set('[PC]', this.opecode);
+        this.inc_pc();
 
-          this.set('[PC]', this.opecode);
-          this.inc_pc();
-
-          if(this.nimonic.match(/n$/)){
-            if(this.ast.dst.match(/^\d+$/)){
-              this.set('[PC]', Number(this.operand));
-            }else if(this.ast.dst.match(/^:.*$/)){
-              this.set('[PC]', this.labels[this.ast.dst]);
-            }
-            this.inc_pc();
+        if (this.nimonic.match(/n$/)) {
+          var len = this.params.length;
+          if (len < 2 || 3 < len) {
+            this.add_message('不正な命令長：' + line);
+            continue;            
           }
+          this.operand = this.params[len-1];
+          this.set('[PC]', this.operand);
+          this.inc_pc();
         }
       }
       this.pc = 0;
-    },
-
-    set_ast: function(line) {
-      if (line == ''){
-        this.ast.code = 'NULL';
-        this.ast.length = 0;
-        return
-      }
-
-      this.nimonic = line.toUpperCase();
-      this.nimonic = this.nimonic.replace(/^\d+:/,''); //行番号削除
-      this.params = this.nimonic.split(' ');
-
-      this.nimonic = this.nimonic.replace(/\d+$/,'n');
-      this.nimonic = this.nimonic.replace(/:.*$/,'n'); // ラベルを変換
-
-      if(this.params[0].match(/^:/)){
-        this.ast.code = 'LABEL';
-        this.ast.dst = this.params[0];
-        this.ast.src = '';
-        this.ast.length = 0;
-      }else{
-        this.ast.code = this.params[0];
-        this.ast.dst = this.params[1];
-        this.ast.src = this.params[2];
-        if(this.nimonic.match(/n$/)){
-          this.ast.length = 2;
-        }else{
-          this.ast.length = 1;
-        }
-      }
-    },
-
-    reset_register: function(){
-      this.pc = 0;
-      this.a = 0;
-      this.b = 20;
-      this.c = 0;
-      this.halt = false;
-      this.zero = false;
-      this.carry = false;
-      this.sp = 39;
-      this.message = [];
     },
 
     reset_memory: function(){
-      for(var i = 0; i < 40; i++){
+      for(var i = 0; i < MEMORY_SIZE; i++){
         this.ms[i].val = 0;
       }
     },
@@ -523,6 +475,11 @@ new Vue({
           this.set(p1,v2);
           break;
 
+        case 'EX':
+          this.set(p1,v2);
+          this.set(p2,v1);
+          break;
+
         case 'ADD':
           this.set(p1,this.add(v1, v2));
           break;
@@ -532,7 +489,7 @@ new Vue({
           break;
 
         case 'CMP':
-          p1,this.cmp(v1, v2);
+          this.cmp(v1, v2);
           break;
 
         case 'JMP':
@@ -542,18 +499,18 @@ new Vue({
           break;
           
         case 'CALL':
-          if(this.check_condition(p1)){
-            this.push('A');
-            this.push('PC');
-            this.pc = this.operand;
-          }
+          this.push('PC');
+          this.push('C');
+          this.push('B');
+          this.push('A');
+          this.set('PC', this.operand);
           break;
 
         case 'RET':
-          if(this.check_condition(p1)){
-            this.pop('PC');
-            this.pop('A');
-          }
+          this.pop('A');
+          this.pop('B');
+          this.pop('C');
+          this.pop('PC');
           break;
 
         default:
